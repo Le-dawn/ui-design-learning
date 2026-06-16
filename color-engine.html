@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Engine — UI 色彩系统生成器</title>
+<style>
+/* ============================================================
+   TOOL UI STYLES — 固定中性色，不受生成结果影响
+   ============================================================ */
+:root {
+  --ui-bg: #F8F9FA;
+  --ui-surface: #FFFFFF;
+  --ui-border: #E5E9ED;
+  --ui-text: #2D3748;
+  --ui-text-secondary: #6B7280;
+  --ui-text-muted: #9CA3AF;
+  --ui-accent: #4F6EF7;
+  --ui-accent-hover: #3B5DE7;
+  --ui-radius: 10px;
+  --ui-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --ui-shadow-lg: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+.header {
+  background: var(--ui-surface);
+  border-bottom: 1px solid var(--ui-border);
+  padding: 20px 0;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--ui-shadow);
+}
+.header-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 16px; }
+.header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; }
+.header .badge { font-size: .72rem; background: #EEF2FF; color: var(--ui-accent); padding: 3px 10px; border-radius: 100px; font-weight: 600; }
+
+/* Container */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+/* Section */
+.section { margin: 32px 0; }
+.section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
+.section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: var(--ui-accent); color: #fff; font-size: .75rem; font-weight: 700; }
+
+/* Cards */
+.card { background: var(--ui-surface); border-radius: var(--ui-radius); border: 1px solid var(--ui-border); padding: 24px; box-shadow: var(--ui-shadow); }
+.card + .card { margin-top: 16px; }
+
+/* Input Area */
+.input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.input-color-group { display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--ui-bg); border-radius: 8px; border: 1px dashed var(--ui-border); }
+.input-color-group .label-row { display: flex; align-items: center; justify-content: space-between; }
+.input-color-group label { font-size: .82rem; font-weight: 600; color: var(--ui-text-secondary); }
+.input-color-group .remove-btn { font-size: .7rem; color: #EF4444; cursor: pointer; background: none; border: none; padding: 2px 6px; border-radius: 4px; }
+.input-color-group .remove-btn:hover { background: #FEF2F2; }
+.input-row { display: flex; gap: 8px; align-items: center; }
+.input-row input[type="color"] { width: 42px; height: 42px; border: 2px solid var(--ui-border); border-radius: 8px; cursor: pointer; padding: 2px; background: #fff; }
+.input-row input[type="color"]:focus { border-color: var(--ui-accent); outline: none; }
+.input-row input[type="text"] { flex: 1; height: 42px; padding: 0 12px; border: 1.5px solid var(--ui-border); border-radius: 8px; font-size: .9rem; font-family: "SF Mono", "Fira Code", monospace; color: var(--ui-text); background: #fff; }
+.input-row input[type="text"]:focus { border-color: var(--ui-accent); outline: none; box-shadow: 0 0 0 3px rgba(79,110,247,.1); }
+.input-row input[type="number"] { width: 56px; height: 42px; padding: 0 6px; border: 1.5px solid var(--ui-border); border-radius: 8px; font-size: .82rem; text-align: center; color: var(--ui-text); background: #fff; }
+.input-row input[type="number"]:focus { border-color: var(--ui-accent); outline: none; }
+.input-row .pct-sign { font-size: .82rem; color: var(--ui-text-muted); }
+
+.btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
+.btn-primary { background: var(--ui-accent); color: #fff; }
+.btn-primary:hover { background: var(--ui-accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,110,247,.3); }
+.btn-outline { background: #fff; color: var(--ui-text); border: 1.5px solid var(--ui-border); }
+.btn-outline:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
+.btn-sm { padding: 6px 14px; font-size: .78rem; }
+
+/* Swatch Grid */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+.swatch { border-radius: 10px; overflow: hidden; border: 1px solid var(--ui-border); background: #fff; }
+.swatch-preview { height: 64px; position: relative; display: flex; align-items: center; justify-content: center; }
+.swatch-preview .checker { /* subtle pattern hidden by color fill */ }
+.swatch-info { padding: 10px 12px; }
+.swatch-info .name { font-size: .72rem; font-weight: 600; color: var(--ui-text-secondary); margin-bottom: 2px; }
+.swatch-info .hex { font-size: .78rem; font-family: "SF Mono", "Fira Code", monospace; color: var(--ui-text); }
+.swatch-info .hsl-label { font-size: .68rem; color: var(--ui-text-muted); margin-top: 2px; }
+
+/* Dual column (light/dark) */
+.dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .dual-grid { grid-template-columns: 1fr; } }
+.dual-col-label { font-size: .78rem; font-weight: 700; margin-bottom: 10px; padding: 4px 10px; display: inline-block; border-radius: 4px; }
+.dual-col-label.light { background: #FFF9E6; color: #B45309; }
+.dual-col-label.dark { background: #1F2937; color: #E5E7EB; }
+
+/* Analysis */
+.analysis-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--ui-border); }
+.analysis-item:last-child { border-bottom: none; }
+.analysis-item .icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+.analysis-item .detail { font-size: .88rem; }
+.analysis-item .detail .desc { color: var(--ui-text-secondary); font-size: .8rem; margin-top: 2px; }
+.analysis-item .detail .before-after { display: inline-flex; gap: 8px; align-items: center; margin-top: 4px; }
+.analysis-item .detail .mini-swatch { display: inline-block; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--ui-border); vertical-align: middle; }
+.analysis-item .detail .arrow { color: var(--ui-text-muted); margin: 0 2px; }
+
+/* Component Showcase */
+.comp-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 20px; }
+.comp-label { font-size: .75rem; font-weight: 600; color: var(--ui-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Theme toggle */
+.theme-toggle-bar { display: flex; gap: 4px; background: #E5E9ED; padding: 3px; border-radius: 8px; width: fit-content; }
+.theme-toggle-btn { padding: 6px 14px; border: none; background: none; border-radius: 6px; font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ui-text-secondary); transition: all .15s; }
+.theme-toggle-btn.active { background: #fff; color: var(--ui-text); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+
+/* CSS Output */
+.css-block { background: #1E293B; color: #E2E8F0; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; font-size: .8rem; line-height: 1.7; position: relative; white-space: pre; }
+.css-block .copy-btn { position: absolute; top: 12px; right: 12px; }
+.css-block code { display: block; }
+.token-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.token-table th { text-align: left; padding: 10px 14px; background: var(--ui-bg); font-size: .75rem; font-weight: 700; color: var(--ui-text-secondary); text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid var(--ui-border); }
+.token-table td { padding: 8px 14px; border-bottom: 1px solid var(--ui-border); }
+.token-table .color-cell { display: flex; align-items: center; gap: 8px; }
+.token-table .color-dot { width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.08); }
+.token-table code { font-family: "SF Mono", "Fira Code", monospace; font-size: .8rem; background: #F1F3F5; padding: 1px 6px; border-radius: 3px; }
+
+/* Empty state */
+.empty-hint { text-align: center; padding: 48px 24px; color: var(--ui-text-muted); }
+.empty-hint .icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* Misc */
+.note { font-size: .78rem; color: var(--ui-text-muted); margin-top: 8px; line-height: 1.5; }
+summary { cursor: pointer; font-weight: 600; font-size: .88rem; padding: 4px 0; }
+summary:hover { color: var(--ui-accent); }
+details[open] summary { margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Color Engine</h1>
+    <span class="badge">UI 色彩系统生成器</span>
+    <span style="flex:1"></span>
+    <span style="font-size:.78rem;color:var(--ui-text-muted)">品牌色 → 强调色 → 中性色 → 辅助色 → 功能色 → Token</span>
+  </div>
+</div>
+
+<div class="container" style="padding-top:28px;padding-bottom:60px">
+
+  <!-- ==================== INPUT ==================== -->
+  <section class="section" id="input-section">
+    <div class="card">
+      <div class="section-title"><span class="num">1</span> 输入 Logo 颜色</div>
+
+      <!-- Logo 取色区 -->
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('logo-file-input').click()" style="border:2px dashed var(--ui-border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--ui-bg);margin-bottom:20px;transition:all .2s" onmouseenter="this.style.borderColor='var(--ui-accent)';this.style.background='#EEF2FF'" onmouseleave="this.style.borderColor='var(--ui-border)';this.style.background='var(--ui-bg)'">
+        <div style="font-size:1.5rem;margin-bottom:4px">🖼</div>
+        <p style="color:var(--ui-text-secondary);font-size:.84rem;margin:0">拖拽或点击上传 Logo 自动取色</p>
+        <p style="color:var(--ui-text-muted);font-size:.72rem;margin:2px 0 0">提取后自动填入下方色值，也可手动编辑</p>
+        <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoFile(this.files[0])" style="display:none">
+      </div>
+
+      <div class="input-grid" id="color-inputs">
+        <div class="input-color-group" data-index="0">
+          <div class="label-row">
+            <label>颜色 1（主角）</label>
+          </div>
+          <div class="input-row">
+            <input type="color" value="#2563EB" onchange="syncHexInput(this)">
+            <input type="text" value="#2563EB" placeholder="#000000" class="hex-input" onchange="syncColorPicker(this)">
+            <input type="number" value="100" min="0" max="100" placeholder="%" class="weight-input">
+            <span class="pct-sign">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline btn-sm" onclick="addColorInput()">+ 添加颜色</button>
+        <button class="btn btn-primary" onclick="generate()">生成色彩系统</button>
+      </div>
+      <p class="note">支持 1-4 个品牌色。多色时可填权重百分比（如 60%、25%、15%），不填则均分。点击「生成」后自动选出最佳强调色。</p>
+    </div>
+  </section>
+
+  <!-- ==================== RESULTS ==================== -->
+  <div id="results" style="display:none">
+
+    <!-- Analysis -->
+    <section class="section" id="analysis-section">
+      <div class="card">
+        <div class="section-title"><span class="num">2</span> 分析诊断</div>
+        <div id="analysis-content"></div>
+      </div>
+    </section>
+
+    <!-- Accent Colors -->
+    <section class="section" id="accent-section">
+      <div class="card">
+        <div class="section-title"><span class="num">3</span> 强调色 · 5 级色阶</div>
+        <div class="dual-grid">
+          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="accent-light"></div></div>
+          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="accent-dark"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Neutral Colors -->
+    <section class="section" id="neutral-section">
+      <div class="card">
+        <div class="section-title"><span class="num">4</span> 中性色 · 8 级灰阶 <span id="neutral-label" style="font-weight:400;font-size:.78rem;color:var(--ui-text-muted)"></span></div>
+        <div class="dual-grid">
+          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="neutral-light"></div></div>
+          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="neutral-dark"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Secondary Colors -->
+    <section class="section" id="secondary-section">
+      <div class="card">
+        <div class="section-title"><span class="num">5</span> 辅助色</div>
+        <div class="dual-grid">
+          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="secondary-light"></div></div>
+          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="secondary-dark"></div></div>
+        </div>
+        <details style="margin-top:16px">
+          <summary>查看邻近色备选方案</summary>
+          <div class="dual-grid" style="margin-top:12px">
+            <div><span class="dual-col-label light">☀ 亮色 · 邻近</span><div class="swatch-grid" id="adjacent-light"></div></div>
+            <div><span class="dual-col-label dark">☾ 暗色 · 邻近</span><div class="swatch-grid" id="adjacent-dark"></div></div>
+          </div>
+        </details>
+        <details style="margin-top:12px">
+          <summary>查看冷暖对比方案（温度反差辅助）</summary>
+          <div class="dual-grid" style="margin-top:12px">
+            <div><span class="dual-col-label light">☀ 亮色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-light"></div></div>
+            <div><span class="dual-col-label dark">☾ 暗色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-dark"></div></div>
+          </div>
+        </details>
+        <details style="margin-top:12px">
+          <summary>查看纯灰色方案（内容型产品适用）</summary>
+          <div class="dual-grid" style="margin-top:12px">
+            <div><span class="dual-col-label light">☀ 亮色 · 灰色</span><div class="swatch-grid" id="gray-secondary-light"></div></div>
+            <div><span class="dual-col-label dark">☾ 暗色 · 灰色</span><div class="swatch-grid" id="gray-secondary-dark"></div></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Functional Colors -->
+    <section class="section" id="functional-section">
+      <div class="card">
+        <div class="section-title"><span class="num">6</span> 功能色</div>
+        <div class="dual-grid">
+          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="functional-light"></div></div>
+          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="functional-dark"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Component Showcase -->
+    <section class="section" id="components-section">
+      <div class="card" id="comp-preview-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="section-title" style="margin-bottom:0"><span class="num">7</span> 组件案例</div>
+          <div class="theme-toggle-bar" id="theme-toggle">
+            <button class="theme-toggle-btn active" onclick="setPreviewTheme('light', this)">☀ 亮色</button>
+            <button class="theme-toggle-btn" onclick="setPreviewTheme('dark', this)">☾ 暗色</button>
+          </div>
+        </div>
+        <div id="component-demo">
+          <!-- Dynamically filled -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CSS Output -->
+    <section class="section" id="css-section">
+      <div class="card">
+        <div class="section-title"><span class="num">8</span> CSS 变量导出</div>
+        <div class="css-block" id="css-output-block">
+          <button class="btn btn-sm btn-outline copy-btn" onclick="copyCSS()" style="position:absolute;top:12px;right:12px;background:#334155;color:#E2E8F0;border-color:#475569">复制全部</button><code id="css-code"></code>
+        </div>
+        <details style="margin-top:16px">
+          <summary>查看 Token 对照表</summary>
+          <div style="overflow-x:auto;margin-top:12px">
+            <table class="token-table" id="token-table">
+              <thead><tr><th>Token 名称</th><th>亮色值</th><th>暗色值</th><th>用途</th></tr></thead>
+              <tbody id="token-table-body"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<style id="generated-tokens"></style>
+
+<script src="color-math.js"></script>
+<script src="color-engine-core.js"></script>
+<script src="color-engine-ui.js"></script>
+<!-- End of Color Engine scripts -->
+
+</body>
+</html>
