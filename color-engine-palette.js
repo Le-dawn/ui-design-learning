@@ -122,8 +122,8 @@ function computeBeautifulAccent(sourceOklch) {
     adjustments.push({ param: 'L', from: sourceOklch.L.toFixed(2), to: targetL.toFixed(2), reason: '黄色需保持高明度以防脏感' });
   }
 
-  // Product 模式：压低 C 避免干扰操作区
-  if (currentRegister === 'product') {
+  // 克制策略：强调色整体收敛（压低 C、限制 L 区间），避免干扰操作区——克制 = 整体克制
+  if (currentStrategy === 'restrained') {
     targetC = targetC * 0.85;
     targetL = clamp(targetL, 0.40, 0.72);
   }
@@ -285,7 +285,6 @@ function generateAccentScaleDark(accentOklch) {
 function generateNeutralsLight(accentH) {
   const brandHue = accentH;
   const label = isWarmHue(accentH) ? '暖灰系 (Warm Gray)' : '冷灰系 (Cool Gray)';
-  const isProduct = currentRegister === 'product';
 
   const levels = [
     { name: 'neutral-0',   l: 0.985, usage: '页面背景（浅灰画布）' },
@@ -298,8 +297,8 @@ function generateNeutralsLight(accentH) {
     { name: 'neutral-600', l: 0.13,  usage: '标题 / 高强调文字' },
   ];
 
-  // 背景区色温峰值（committed 下 ≈0.020，肉眼可辨的品牌色调；product 减半；drenched 封顶防过头）
-  const cPeak = clamp((isProduct ? 0.010 : 0.020) * getStrategyFactor(), 0, 0.028);
+  // 背景区色温峰值随策略缩放：committed ≈0.020（肉眼可辨的品牌色调），克制 ×0.5 自然变淡，drenched 封顶防过头
+  const cPeak = clamp(0.020 * getStrategyFactor(), 0, 0.028);
   // 文字区保留极淡品牌色温（≈Radix sand/olive 风格），整页色温同频，肉眼几乎无感
   const textC = 0.008;
   // 表面四层（画布/卡片/悬停/边框）的 C 占比：卡片纯白带极淡色温 → 边框最浓
@@ -324,8 +323,7 @@ function generateNeutralsLight(accentH) {
 
 function generateNeutralsDark(accentH) {
   const brandHue = accentH;
-  const isProduct = currentRegister === 'product';
-  const cPeak = clamp((isProduct ? 0.008 : 0.014) * getStrategyFactor(), 0, 0.022);
+  const cPeak = clamp(0.014 * getStrategyFactor(), 0, 0.022);
   const textC = 0.008;
 
   const levels = [

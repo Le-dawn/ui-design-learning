@@ -129,7 +129,6 @@ function saveState() {
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       groups,
-      register: currentRegister,
       strategy: currentStrategy,
       baseUnit: spaceBaseUnit,
       demoType: currentDemoType,
@@ -150,7 +149,6 @@ function restoreState() {
     container.innerHTML = '';
     s.groups.forEach((g, i) => container.appendChild(createColorGroup(i, g.hex, g.weight)));
 
-    if (s.register === 'brand' || s.register === 'product') currentRegister = s.register;
     if (['restrained', 'committed', 'full-palette', 'drenched'].indexOf(s.strategy) !== -1) currentStrategy = s.strategy;
     if (s.baseUnit === 4 || s.baseUnit === 8) spaceBaseUnit = s.baseUnit;
     if (s.demoType === 'landing' || s.demoType === 'app') currentDemoType = s.demoType;
@@ -164,7 +162,6 @@ function applyToggleState() {
   const setActive = (selector, val) => {
     document.querySelectorAll(selector).forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
   };
-  setActive('#register-toggle .theme-toggle-btn', currentRegister);
   setActive('#strategy-toggle .theme-toggle-btn', currentStrategy);
   setActive('#base-unit-toggle .theme-toggle-btn', spaceBaseUnit);
   setActive('#demo-type-toggle .theme-toggle-btn', currentDemoType);
@@ -365,6 +362,20 @@ function autoFillFromLogo(colors) {
 
 var _tweakTimer = null;
 var _tweakDirty = false;
+// 策略/基准状态行：让「色彩策略」「间距基准」切换在实时调色区有直接反馈
+// 策略只影响中性色色温浓度与辅助色（不碰强调色——强调色由滑块控制），
+// 「克制」额外收敛强调色（C×0.85 + L 区间）
+function updateTweakContext() {
+  const el = document.getElementById('tweak-context');
+  if (!el) return;
+  const names = { restrained: '克制', committed: '投入', 'full-palette': '全色板', drenched: '浸染' };
+  const factors = { restrained: 0.5, committed: 1.0, 'full-palette': 1.5, drenched: 2.0 };
+  const name = names[currentStrategy] || currentStrategy;
+  const f = factors[currentStrategy] || 1.0;
+  const unit = spaceBaseUnit === 8 ? '8px 标准' : '4px 精细';
+  el.textContent = '策略 ' + name + ' ×' + f + ' · 基准 ' + unit + ' · 强调色归滑块';
+}
+
 function syncTweakSliders(oklch) {
   var hSlider = document.getElementById('tweak-h');
   var cSlider = document.getElementById('tweak-c');

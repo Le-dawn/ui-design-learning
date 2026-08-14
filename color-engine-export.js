@@ -37,7 +37,7 @@ const STYLE_PROMPTS = {
     name: '光谱世界（纸面工业）',
     body: [
       '- 表面：纸白底 + 1px 发丝线边框 + 微偏移阴影；3px 小倒角，禁用圆角胶囊',
-      '- 字体：展示用几何无衬线（Geologica 类），数据/时间/编号用等宽字体（IBM Plex Mono 类），数字一律 tabular；别让同一字重从头走到尾',
+      '- 字体：展示用几何无衬线（Avenir Next / Bahnschrift 类系统栈），数据/时间/编号用等宽字体（SF Mono / Cascadia Code 类），数字一律 tabular；别让同一字重从头走到尾',
       '- 强调色：只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），中性色承担全部结构',
       '- 装饰：无渐变、无光斑、无 emoji；图形用统一 1.8 描边 SVG 线稿',
       '- 气质：像天文台控制台、实验室仪器——数据可信，界面退后'
@@ -138,10 +138,11 @@ function buildStylePromptExport(tokens) {
 
 // 组件 CSS：与组件案例页完全同一份样式，配合 CSS 变量复制即用
 function buildComponentCSSExport() {
+  const styleName = (STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum).name;
   return '/* ═══════════════════════════════════════════\n' +
-    '   Color Engine — 组件 CSS（光谱世界 · Solstice 示例）\n' +
+    '   Color Engine — 组件 CSS（' + styleName + ' · Solstice 示例）\n' +
     '   配合「CSS 变量」导出一起使用：先复制 :root / [data-theme="dark"]，再复制本文件\n' +
-    '   字体：Geologica（展示）/ 系统栈（正文）/ IBM Plex Mono（数据）\n' +
+    '   字体：系统原生栈，零依赖（展示 Avenir Next / Bahnschrift 类 · 正文系统无衬线 · 数据 SF Mono / Cascadia Code）\n' +
     '   所有值都引用 CSS 变量，换肤只改变量不碰组件\n' +
     '\n' +
     '   光谱世界设计约定（让页面不丑的最低标准）：\n' +

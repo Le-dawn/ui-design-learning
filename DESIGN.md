@@ -18,7 +18,7 @@ colors:
   text-muted: "#7D7A6D"
 typography:
   display:
-    fontFamily: "Geologica, -apple-system, BlinkMacSystemFont, \"PingFang SC\", sans-serif"
+    fontFamily: "\"Avenir Next\", \"Bahnschrift\", \"Segoe UI\", -apple-system, BlinkMacSystemFont, \"PingFang SC\", sans-serif"
     fontSize: "clamp(1.85rem, 4.2vw, 2.9rem)"
     fontWeight: 700
     lineHeight: 1.12
@@ -28,7 +28,7 @@ typography:
     fontSize: "1rem"
     lineHeight: 1.65
   data:
-    fontFamily: "\"IBM Plex Mono\", \"SF Mono\", \"Fira Code\", ui-monospace, Menlo, monospace"
+    fontFamily: "\"SF Mono\", \"Cascadia Code\", Consolas, ui-monospace, Menlo, monospace"
     fontFeature: "tabular-nums"
 rounded:
   sm: "3px"
@@ -89,7 +89,7 @@ components:
 
 **Key Characteristics:**
 - 中性承担全部结构，光谱红只出现在语义位置（≤3 处/屏）
-- 数据区是仪器的灵魂：IBM Plex Mono + tabular-nums + 发丝刻度
+- 数据区是仪器的灵魂：系统等宽（SF Mono / Cascadia Code）+ tabular-nums + 发丝刻度
 - 3px 倒角、无圆角胶囊；发丝边框 + 偏移阴影分层，深度不靠色
 - 输出按科学图版编号（Plate 01、02…）
 - 文本层级按明度分级（neutral 300/400/500/600），不靠透明度
@@ -118,20 +118,20 @@ components:
 
 ## Typography
 
-**Display Font:** Geologica（回退到系统栈）
-**Body Font:** 系统栈（-apple-system / PingFang SC / Hiragino Sans GB / Microsoft YaHei）
-**Label/Mono Font:** IBM Plex Mono（回退 SF Mono / Fira Code / ui-monospace）
+**Display Font:** Avenir Next / Bahnschrift（系统原生栈，零依赖、离线一致：macOS 用 Avenir Next，Windows 用 Bahnschrift/Segoe UI；不再依赖 webfont）
+**Body Font:** 系统栈（-apple-system / Segoe UI / PingFang SC / Hiragino Sans GB / Microsoft YaHei）
+**Label/Mono Font:** SF Mono / Cascadia Code / Consolas（系统原生等宽栈，回退 ui-monospace / Menlo）
 
-**Character:** 三声部分工，展示体 Geologica 负责标题的重量与宽度感，正文安静地待在系统栈里，数据全部交给 IBM Plex Mono——正文与数据的分野就是"纸面叙述"与"仪器读数"的分野。全站 `font-variant-numeric: tabular-nums`。
+**Character:** 三声部分工，展示体（Avenir Next / Bahnschrift）负责标题的重量与宽度感，正文安静地待在系统栈里，数据全部交给系统等宽（SF Mono / Cascadia Code）——正文与数据的分野就是"纸面叙述"与"仪器读数"的分野。全站 `font-variant-numeric: tabular-nums`。注意：展示体无 CJK 字形，中文标题由系统中文栈发声，拉丁串（SOLSTICE / NIGHT 1 / EPOCH…）承载展示声部。
 
 ### Hierarchy
-- **Display** (Geologica 700, clamp(1.85rem, 4.2vw, 2.9rem), 1.12, -0.02em)：hero 主角标题，限宽 18ch。区块标题用 1.02–1.25rem。
+- **Display** (Avenir Next / Bahnschrift 700, clamp(1.85rem, 4.2vw, 2.9rem), 1.12, -0.02em)：hero 主角标题，限宽 18ch。区块标题用 1.02–1.25rem。
 - **Body** (系统栈 400, 1rem, 1.65)：正文与说明；hero 副文 0.98rem / 1.7 / 限宽 46ch。
-- **Label/Data** (IBM Plex Mono 400–600, 0.62–0.86rem, 1.6)：色值、编号图版、epoch 时间戳、状态标签、仪器读数；元信息行用 0.62–0.68rem + 0.04–0.12em 字距 + 大写（拉丁字母部分）。
+- **Label/Data** (系统等宽 400–600, 0.62–0.86rem, 1.6)：色值、编号图版、epoch 时间戳、状态标签、仪器读数；元信息行用 0.62–0.68rem + 0.04–0.12em 字距 + 大写（拉丁字母部分）。
 - **微标注** (Mono 0.64–0.66rem, 0.05–0.12em 字距)：发丝刻度尺标签、图版编号、页脚。
 
 ### Named Rules
-**The Tabular Rule（数据即读数）.** 一切数据性内容——色值、编号、时间、状态、统计——必须用 IBM Plex Mono 且 tabular-nums；同一字重不许从头走到尾，标题 700 / 正文 400 / 数据 400–600 分级。
+**The Tabular Rule（数据即读数）.** 一切数据性内容——色值、编号、时间、状态、统计——必须用系统等宽（SF Mono / Cascadia Code）且 tabular-nums；同一字重不许从头走到尾，标题 700 / 正文 400 / 数据 400–600 分级。
 
 ## Layout
 
@@ -197,7 +197,7 @@ components:
 
 ### Do:
 - **Do** 让中性承担全部结构；彩色元素一屏不超过 3 处，且只在语义位置（主按钮 / 激活链接 / 选中态）。
-- **Do** 把数据性内容放进 IBM Plex Mono + tabular-nums，让字重分级（标题 700 / 正文 400 / 数据 400–600）。
+- **Do** 把数据性内容放进系统等宽（SF Mono / Cascadia Code）+ tabular-nums，让字重分级（标题 700 / 正文 400 / 数据 400–600）。
 - **Do** 用 3px 倒角（容器 6px）——倒角是仪器的倒角，不是圆润的胶囊。
 - **Do** 用发丝边框 + 偏移阴影表达层级，暗色一律落到墨板（#1C1C20）上。
 - **Do** 让文字层级按中性明度分级（neutral-300 弱化 / 400 次要 / 500 主要 / 600 标题），不靠透明度。

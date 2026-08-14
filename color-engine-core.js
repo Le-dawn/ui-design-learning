@@ -3,7 +3,6 @@
    依赖：color-math.js, color-engine-palette.js（先加载，运行时引用）
    ============================================================ */
 
-let currentRegister = 'brand';   // 'brand' | 'product'
 let currentStrategy = 'committed'; // 'restrained' | 'committed' | 'full-palette' | 'drenched'
 
 let lastAccentOklch = null;
@@ -78,14 +77,6 @@ function accentDetailHTML(accent, mode) {
   return html;
 }
 
-function setRegister(val, btn) {
-  currentRegister = val;
-  var btns = document.querySelectorAll('#register-toggle .theme-toggle-btn');
-  btns.forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  if (typeof generate === 'function') generate(true); // 静默：不滚动、不重置预览主题
-}
-
 function setStrategy(val, btn) {
   currentStrategy = val;
   var btns = document.querySelectorAll('#strategy-toggle .theme-toggle-btn');
@@ -136,9 +127,9 @@ function computeSystem(accentOklch, opts) {
   };
 
   // 浮层表面：亮色与卡片同白（深度交给阴影 shadow-md/lg），暗色比卡片更亮
-  const isProduct = currentRegister === 'product';
-  const raisedCLight = 0.10 * clamp((isProduct ? 0.010 : 0.020) * getStrategyFactor(), 0, 0.028);
-  const raisedCDark = 0.5 * clamp((isProduct ? 0.008 : 0.014) * getStrategyFactor(), 0, 0.022);
+  // 表面色温峰值随策略缩放（克制 ×0.5 自然得到"产品级"淡色温）
+  const raisedCLight = 0.10 * clamp(0.020 * getStrategyFactor(), 0, 0.028);
+  const raisedCDark = 0.5 * clamp(0.014 * getStrategyFactor(), 0, 0.022);
   const surfaceRaised = {
     light: { oklch: { L: 1.0, C: raisedCLight, H: ok.H }, hex: oklchToHex(1.0, raisedCLight, ok.H) },
     dark: { oklch: { L: 0.17, C: raisedCDark, H: ok.H }, hex: oklchToHex(0.17, raisedCDark, ok.H) }
@@ -275,6 +266,8 @@ function generate(silent) {
   // 初始化实时调色滑块并绑定事件
   if (typeof initTweakSliders === 'function') initTweakSliders(lastAccentOklch);
   if (typeof setupBidirectionalHighlight === 'function') setupBidirectionalHighlight();
+  // 策略/间距基准状态行（开关切换走 generate，这里统一刷新反馈）
+  if (typeof updateTweakContext === 'function') updateTweakContext();
 
   // 持久化当前输入与开关状态
   if (typeof saveState === 'function') saveState();

@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Color Engine — UI 色彩系统生成器</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400..800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
 /* ════════════════════════════════════════════════════════
    光谱世界 · 纸面光谱图 — 工具自身 UI
@@ -30,9 +27,9 @@
   --ui-radius-lg: 6px;
   --ui-shadow: 0 1px 0 rgba(28,28,32,.04), 0 2px 10px rgba(28,28,32,.06);
   --ui-shadow-lg: 0 1px 0 rgba(28,28,32,.04), 0 2px 4px rgba(28,28,32,.05), 0 18px 44px rgba(28,28,32,.12);
-  --ui-font-display: "Geologica", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --ui-font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  --ui-font-mono: "IBM Plex Mono", "SF Mono", "Fira Code", ui-monospace, Menlo, monospace;
+  --ui-font-display: "Avenir Next", "Bahnschrift", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --ui-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --ui-font-mono: "SF Mono", "Cascadia Code", Consolas, ui-monospace, Menlo, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -167,8 +164,7 @@ input, textarea { caret-color: var(--ui-accent); }
 .rules-strip-item { line-height: 1.6; }
 .rules-strip-item .rs-k { font-family: var(--ui-font-mono); font-size: .74rem; color: var(--ui-accent); font-weight: 600; margin-right: 6px; }
 
-/* 全屏预览覆盖层（示例占满整个视口，tokens 实时生效） */
-.fs-open { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ui-accent); border-radius: var(--ui-radius); background: var(--ui-accent-soft); color: var(--ui-accent); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); letter-spacing: .04em; transition: background .15s, color .15s; }
+/* 全屏预览覆盖层（示例占满整个视口，tokens 实时生效） */.fs-open { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ui-accent); border-radius: var(--ui-radius); background: var(--ui-accent-soft); color: var(--ui-accent); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); letter-spacing: .04em; transition: background .15s, color .15s; }
 .fs-open:hover { background: var(--ui-accent); color: #FFF; }
 #fullscreen-overlay { position: fixed; inset: 0; z-index: 2000; display: none; overflow-y: auto; background: var(--color-bg-primary); color: var(--color-text-primary); }
 #fullscreen-overlay.open { display: block; }
@@ -207,9 +203,15 @@ summary { cursor: pointer; font-weight: 600; font-size: .86rem; padding: 4px 0; 
 summary:hover { color: var(--ui-accent); }
 details[open] summary { margin-bottom: 12px; }
 
+/* Detector 明细中的内联 JSON 不允许撑破页面（375px 横向溢出根因） */
+#detector-detail-content { overflow-wrap: anywhere; word-break: break-all; }
+
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
   .card { padding: 18px; }
+  /* 间距条的固定内联宽度（最大 323px）在窄屏撑破页面：允许换行 + 收缩 */
+  .space-bar-row { flex-wrap: wrap; row-gap: 4px; }
+  .space-bar { flex-shrink: 1; }
 }
 </style>
 </head>
@@ -283,12 +285,7 @@ details[open] summary { margin-bottom: 12px; }
         <button class="btn btn-primary" onclick="generate()">生成色彩系统</button>
       </div>
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">场景</span>
-        <div class="theme-toggle-bar" id="register-toggle">
-          <button class="theme-toggle-btn active" data-val="brand" onclick="setRegister('brand', this)">品牌</button>
-          <button class="theme-toggle-btn" data-val="product" onclick="setRegister('product', this)">产品</button>
-        </div>
-        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary);margin-left:8px">色彩策略</span>
+        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">色彩策略</span>
         <div class="theme-toggle-bar" id="strategy-toggle">
           <button class="theme-toggle-btn" data-val="restrained" onclick="setStrategy('restrained', this)">克制</button>
           <button class="theme-toggle-btn active" data-val="committed" onclick="setStrategy('committed', this)">投入</button>
@@ -303,9 +300,10 @@ details[open] summary { margin-bottom: 12px; }
         <span style="font-size:.74rem;color:var(--ui-text-muted)">间距阶梯默认基于 4px 精细网格，与 Tailwind 对齐</span>
       </div>
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
           <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">实时调色</span>
           <span style="font-size:.74rem;color:var(--ui-text-muted)">拖动滑块微调强调色，页面实时刷新</span>
+          <span style="font-size:.68rem;font-family:var(--ui-font-mono);color:var(--ui-accent);letter-spacing:.02em" id="tweak-context"></span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
           <div>
@@ -447,6 +445,16 @@ details[open] summary { margin-bottom: 12px; }
 
     <!-- Component Showcase -->
     <section class="section" id="components-section">
+      <div class="rules-strip">
+        <div class="rules-strip-title" id="rules-strip-title">光谱世界 · 纸面工业 <span class="rs-hint">（让页面不丑的最低标准，组件 CSS 导出时一并带走）</span></div>
+        <div id="rules-strip-items">
+          <div class="rules-strip-item"><b class="rs-k">01 强调是例外</b>彩色只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），一屏 ≤ 3 处</div>
+          <div class="rules-strip-item"><b class="rs-k">02 数据即读数</b>数据 / 编号 / 时间一律等宽 tabular；字重分级，别让同一字重从头走到尾</div>
+          <div class="rules-strip-item"><b class="rs-k">03 发丝线结构</b>全部结构靠 1px 发丝边框与纸白分层；3px 倒角，禁用圆角胶囊</div>
+          <div class="rules-strip-item"><b class="rs-k">04 深度靠线不靠色</b>偏移阴影 + 发丝线；无渐变、无光斑、无装饰彩虹</div>
+          <div class="rules-strip-item"><b class="rs-k">05 气质</b>像天文台控制台——数据可信，界面退后</div>
+        </div>
+      </div>
       <div class="card" id="comp-preview-card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:14px;flex-wrap:wrap">
           <div class="section-title" style="margin-bottom:0"><span class="num">9</span> 组件案例</div>
@@ -468,14 +476,6 @@ details[open] summary { margin-bottom: 12px; }
             </div>
             <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
           </div>
-        </div>
-        <div class="rules-strip">
-          <div class="rules-strip-title">光谱世界 · 设计约定 <span class="rs-hint">（让页面不丑的最低标准，组件 CSS 导出时一并带走）</span></div>
-          <div class="rules-strip-item"><b class="rs-k">01 强调是例外</b>一屏只给主按钮 / 链接 / 选中态；彩色只出现在语义位置，中性承担全部结构</div>
-          <div class="rules-strip-item"><b class="rs-k">02 字体有声音</b>展示字体 + 正文成对；数据用等宽 tabular 数字，别让同一字重从头走到尾</div>
-          <div class="rules-strip-item"><b class="rs-k">03 组内紧、组间松</b>标题组内 8px，卡片内 24px，区块间 ≥ 48px；宁可空，不可挤</div>
-          <div class="rules-strip-item"><b class="rs-k">04 深度靠阴影不靠色</b>发丝边框 + 偏移阴影；不叠圆角胶囊、不用渐变文字</div>
-          <div class="rules-strip-item"><b class="rs-k">05 禁止 AI 俗套</b>图标卡平铺、眉题 eyebrow、灰底灰字、卡片套卡片——一行都不留</div>
         </div>
         <div id="component-demo">
           <!-- Dynamically filled -->
