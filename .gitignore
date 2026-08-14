@@ -1,1 +1,32 @@
+# ── 系统与编辑器 ──
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ── 依赖 ──
+node_modules/
+
+# ── 环境与日志 ──
+.env
+*.log
+
+# ── 压缩包（练习产物归档） ──
 **/*.zip
+
+# ── AI 工具链本地配置（impeccable 安装器生成的 9 个 harness，本机专用） ──
+.claude/
+.cursor/
+.codex/
+.gemini/
+.agents/
+.kiro/
+.opencode/
+.pi/
+.qoder/
+
+# ── impeccable 运行时状态（决策页、评审截图、缓存，均可再生成） ──
+.impeccable/
+
+# ── 开源参考项目（嵌套 git 仓库 428MB，不作为本仓库内容，仅本地参考） ──
+open-projects/

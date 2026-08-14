@@ -4,148 +4,235 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Color Engine — UI 色彩系统生成器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400..800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   TOOL UI STYLES — 固定中性色，不受生成结果影响
-   ============================================================ */
+/* ════════════════════════════════════════════════════════
+   光谱世界 · 纸面光谱图 — 工具自身 UI
+   ground = 纸白 · structure = 墨灰发丝线 · 唯一强调 = 光谱红
+   倒角 3px · tabular 数字 · 无圆角胶囊
+   ════════════════════════════════════════════════════════ */
 :root {
-  --ui-bg: #F8F9FA;
-  --ui-surface: #FFFFFF;
-  --ui-border: #E5E9ED;
-  --ui-text: #2D3748;
-  --ui-text-secondary: #6B7280;
-  --ui-text-muted: #9CA3AF;
-  --ui-accent: #4F6EF7;
-  --ui-accent-hover: #3B5DE7;
-  --ui-radius: 10px;
-  --ui-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --ui-shadow-lg: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --ui-bg: #F2F1EB;
+  --ui-surface: #FCFBF7;
+  --ui-surface-raised: #FFFFFF;
+  --ui-border: #DFDCD0;
+  --ui-border-strong: #B9B5A5;
+  --ui-text: #23231F;
+  --ui-text-secondary: #57544C;
+  --ui-text-muted: #7D7A6D;
+  --ui-accent: #D6452E;
+  --ui-accent-hover: #BC3B27;
+  --ui-accent-soft: #F7E5DE;
+  --ui-ink: #1C1C20;
+  --ui-radius: 3px;
+  --ui-radius-lg: 6px;
+  --ui-shadow: 0 1px 0 rgba(28,28,32,.04), 0 2px 10px rgba(28,28,32,.06);
+  --ui-shadow-lg: 0 1px 0 rgba(28,28,32,.04), 0 2px 4px rgba(28,28,32,.05), 0 18px 44px rgba(28,28,32,.12);
+  --ui-font-display: "Geologica", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --ui-font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --ui-font-mono: "IBM Plex Mono", "SF Mono", "Fira Code", ui-monospace, Menlo, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-family: var(--ui-font-body);
   background: var(--ui-bg);
   color: var(--ui-text);
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
 }
+::selection { background: var(--ui-accent); color: #FFF; }
+:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+input, textarea { caret-color: var(--ui-accent); }
 
 /* Header */
-.header {
-  background: var(--ui-surface);
-  border-bottom: 1px solid var(--ui-border);
-  padding: 20px 0;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: var(--ui-shadow);
-}
-.header-inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 16px; }
-.header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; }
-.header .badge { font-size: .72rem; background: #EEF2FF; color: var(--ui-accent); padding: 3px 10px; border-radius: 100px; font-weight: 600; }
+.header { background: var(--ui-surface); border-bottom: 1px solid var(--ui-border); padding: 18px 0; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1240px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 14px; }
+.header .prism { flex-shrink: 0; }
+.header h1 { font-family: var(--ui-font-display); font-size: 1.12rem; font-weight: 700; letter-spacing: -.01em; }
+.header .badge { font-size: .68rem; font-family: var(--ui-font-mono); letter-spacing: .1em; color: var(--ui-accent); border: 1px solid var(--ui-accent); padding: 2px 8px; border-radius: 2px; text-transform: uppercase; }
+.header .chain { flex: 1; text-align: right; font-size: .74rem; font-family: var(--ui-font-mono); color: var(--ui-text-muted); letter-spacing: .01em; }
+.header .chain b { color: var(--ui-text-secondary); font-weight: 500; }
+@media (max-width: 760px) { .header .chain { display: none; } }
 
-/* Container */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+/* Container / Sections */
+.container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+.section { margin: 28px 0; }
+.section-title { font-family: var(--ui-font-display); font-size: 1.02rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; letter-spacing: -.01em; }
+.section-title .num { font-family: var(--ui-font-mono); font-size: .68rem; font-weight: 600; letter-spacing: .08em; color: var(--ui-accent); background: var(--ui-accent-soft); border: 1px solid rgba(214,69,46,.28); padding: 2px 7px; border-radius: 2px; }
 
-/* Section */
-.section { margin: 32px 0; }
-.section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; letter-spacing: -.01em; }
-.section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: var(--ui-accent); color: #fff; font-size: .75rem; font-weight: 700; }
-
-/* Cards */
-.card { background: var(--ui-surface); border-radius: var(--ui-radius); border: 1px solid var(--ui-border); padding: 24px; box-shadow: var(--ui-shadow); }
-.card + .card { margin-top: 16px; }
+/* Cards — 纸面，靠发丝边框 + 偏移阴影分层 */
+.card { background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); padding: 24px; box-shadow: var(--ui-shadow); }
+.card + .card { margin-top: 14px; }
 
 /* Input Area */
-.input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.input-color-group { display: flex; flex-direction: column; gap: 10px; padding: 16px; background: var(--ui-bg); border-radius: 8px; border: 1px dashed var(--ui-border); }
+.input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.input-color-group { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--ui-bg); border: 1px dashed var(--ui-border-strong); border-radius: var(--ui-radius); }
 .input-color-group .label-row { display: flex; align-items: center; justify-content: space-between; }
-.input-color-group label { font-size: .82rem; font-weight: 600; color: var(--ui-text-secondary); }
-.input-color-group .remove-btn { font-size: .7rem; color: #EF4444; cursor: pointer; background: none; border: none; padding: 2px 6px; border-radius: 4px; }
-.input-color-group .remove-btn:hover { background: #FEF2F2; }
+.input-color-group label { font-size: .78rem; font-weight: 600; color: var(--ui-text-secondary); }
+.input-color-group .remove-btn { font-size: .68rem; color: var(--ui-accent); cursor: pointer; background: none; border: none; padding: 2px 6px; border-radius: 2px; font-family: var(--ui-font-mono); }
+.input-color-group .remove-btn:hover { background: var(--ui-accent-soft); }
 .input-row { display: flex; gap: 8px; align-items: center; }
-.input-row input[type="color"] { width: 42px; height: 42px; border: 2px solid var(--ui-border); border-radius: 8px; cursor: pointer; padding: 2px; background: #fff; }
+.input-row input[type="color"] { width: 42px; height: 42px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius); cursor: pointer; padding: 2px; background: var(--ui-surface-raised); }
 .input-row input[type="color"]:focus { border-color: var(--ui-accent); outline: none; }
-.input-row input[type="text"] { flex: 1; height: 42px; padding: 0 12px; border: 1.5px solid var(--ui-border); border-radius: 8px; font-size: .9rem; font-family: "SF Mono", "Fira Code", monospace; color: var(--ui-text); background: #fff; }
-.input-row input[type="text"]:focus { border-color: var(--ui-accent); outline: none; box-shadow: 0 0 0 3px rgba(79,110,247,.1); }
-.input-row input[type="number"] { width: 56px; height: 42px; padding: 0 6px; border: 1.5px solid var(--ui-border); border-radius: 8px; font-size: .82rem; text-align: center; color: var(--ui-text); background: #fff; }
-.input-row input[type="number"]:focus { border-color: var(--ui-accent); outline: none; }
-.input-row .pct-sign { font-size: .82rem; color: var(--ui-text-muted); }
+.input-row input[type="text"], .input-row input[type="number"] { height: 42px; border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius); font-size: .86rem; color: var(--ui-text); background: var(--ui-surface-raised); }
+.input-row input[type="text"] { flex: 1; padding: 0 12px; font-family: var(--ui-font-mono); }
+.input-row input[type="text"]:focus, .input-row input[type="number"]:focus { border-color: var(--ui-accent); outline: none; box-shadow: 0 0 0 3px rgba(214,69,46,.14); }
+.input-row input[type="number"] { width: 58px; padding: 0 6px; text-align: center; }
+.input-row .pct-sign { font-size: .78rem; color: var(--ui-text-muted); }
 
 .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: .88rem; font-weight: 600; cursor: pointer; border: none; transition: all .15s; }
-.btn-primary { background: var(--ui-accent); color: #fff; }
-.btn-primary:hover { background: var(--ui-accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,110,247,.3); }
-.btn-outline { background: #fff; color: var(--ui-text); border: 1.5px solid var(--ui-border); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 20px; border-radius: var(--ui-radius); font-size: .86rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--ui-font-body); transition: background .15s, box-shadow .15s, transform .15s; }
+.btn-primary { background: var(--ui-accent); color: #FFF; box-shadow: 0 1px 0 rgba(28,28,32,.08), 0 2px 8px rgba(214,69,46,.28); }
+.btn-primary:hover { background: var(--ui-accent-hover); box-shadow: 0 1px 0 rgba(28,28,32,.08), 0 4px 14px rgba(214,69,46,.32); }
+.btn-primary:active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(28,28,32,.16); }
+.btn-outline { background: var(--ui-surface); color: var(--ui-text); border: 1px solid var(--ui-border-strong); }
 .btn-outline:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
-.btn-sm { padding: 6px 14px; font-size: .78rem; }
+.btn-sm { padding: 6px 14px; font-size: .74rem; }
 
-/* Swatch Grid */
-.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-.swatch { border-radius: 10px; overflow: hidden; border: 1px solid var(--ui-border); background: #fff; }
+/* Swatch Grid — 每块色片是一块编号图版 */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+.swatch { position: relative; border-radius: var(--ui-radius); overflow: hidden; border: 1px solid var(--ui-border); background: var(--ui-surface); }
 .swatch-preview { height: 64px; position: relative; display: flex; align-items: center; justify-content: center; }
-.swatch-preview .checker { /* subtle pattern hidden by color fill */ }
+.swatch-plate { position: absolute; top: 6px; right: 8px; font-family: var(--ui-font-mono); font-size: .64rem; letter-spacing: .05em; color: rgba(28,28,32,.65); background: rgba(252,251,247,.78); padding: 1px 4px; border-radius: 2px; }
 .swatch-info { padding: 10px 12px; }
-.swatch-info .name { font-size: .72rem; font-weight: 600; color: var(--ui-text-secondary); margin-bottom: 2px; }
-.swatch-info .hex { font-size: .78rem; font-family: "SF Mono", "Fira Code", monospace; color: var(--ui-text); }
+.swatch-info .name { font-size: .74rem; font-weight: 600; color: var(--ui-text-secondary); margin-bottom: 2px; }
+.swatch-info .hex { font-size: .74rem; font-family: var(--ui-font-mono); color: var(--ui-text); }
 .swatch-info .hsl-label { font-size: .68rem; color: var(--ui-text-muted); margin-top: 2px; }
 
-/* Dual column (light/dark) */
-.dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+/* Dual column (light/dark) — 仪器读数标签 */
+.dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 768px) { .dual-grid { grid-template-columns: 1fr; } }
-.dual-col-label { font-size: .78rem; font-weight: 700; margin-bottom: 10px; padding: 4px 10px; display: inline-block; border-radius: 4px; }
-.dual-col-label.light { background: #FFF9E6; color: #B45309; }
-.dual-col-label.dark { background: #1F2937; color: #E5E7EB; }
+.dual-col-label { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 500; font-family: var(--ui-font-mono); letter-spacing: .06em; margin-bottom: 10px; padding: 3px 9px; border-radius: 2px; }
+.dual-col-label::before { content: ""; width: 6px; height: 6px; background: var(--ui-accent); border-radius: 1px; }
+.dual-col-label.light { background: var(--ui-surface-raised); color: var(--ui-text); border: 1px solid var(--ui-border-strong); }
+.dual-col-label.dark { background: var(--ui-ink); color: #E8E5DB; border: 1px solid var(--ui-ink); }
+.dual-col-label.dark::before { background: #E8E5DB; }
 
 /* Analysis */
 .analysis-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--ui-border); }
 .analysis-item:last-child { border-bottom: none; }
-.analysis-item .icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
-.analysis-item .detail { font-size: .88rem; }
-.analysis-item .detail .desc { color: var(--ui-text-secondary); font-size: .8rem; margin-top: 2px; }
+.analysis-item .icon { flex-shrink: 0; margin-top: 2px; color: var(--ui-accent); }
+.analysis-item .icon.warn { color: var(--color-warning); }
+.analysis-item .ai { width: 17px; height: 17px; display: block; }
+.analysis-item .detail { font-size: .86rem; }
+.analysis-item .detail .desc { color: var(--ui-text-secondary); font-size: .78rem; margin-top: 2px; }
 .analysis-item .detail .before-after { display: inline-flex; gap: 8px; align-items: center; margin-top: 4px; }
-.analysis-item .detail .mini-swatch { display: inline-block; width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--ui-border); vertical-align: middle; }
+.analysis-item .detail .mini-swatch { display: inline-block; width: 18px; height: 18px; border-radius: 2px; border: 1px solid var(--ui-border); vertical-align: middle; }
 .analysis-item .detail .arrow { color: var(--ui-text-muted); margin: 0 2px; }
 
-/* Component Showcase */
-.comp-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 20px; }
-.comp-label { font-size: .75rem; font-weight: 600; color: var(--ui-text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em; }
+/* Segmented control — 发丝分段，激活态墨底 */
+.theme-toggle-bar { display: inline-flex; gap: 2px; background: var(--ui-bg); border: 1px solid var(--ui-border-strong); padding: 2px; border-radius: var(--ui-radius); width: fit-content; }
+.theme-toggle-btn { padding: 5px 12px; border: none; background: none; border-radius: 2px; font-size: .74rem; font-weight: 600; cursor: pointer; color: var(--ui-text-secondary); font-family: var(--ui-font-body); transition: background .15s, color .15s; }
+.theme-toggle-btn:hover { color: var(--ui-text); }
+.theme-toggle-btn.active { background: var(--ui-ink); color: #F2F1EB; }
 
-/* Theme toggle */
-.theme-toggle-bar { display: flex; gap: 4px; background: #E5E9ED; padding: 3px; border-radius: 8px; width: fit-content; }
-.theme-toggle-btn { padding: 6px 14px; border: none; background: none; border-radius: 6px; font-size: .78rem; font-weight: 600; cursor: pointer; color: var(--ui-text-secondary); transition: all .15s; }
-.theme-toggle-btn.active { background: #fff; color: var(--ui-text); box-shadow: 0 1px 2px rgba(0,0,0,.1); }
-
-/* CSS Output */
-.css-block { background: #1E293B; color: #E2E8F0; padding: 20px 24px; border-radius: 10px; overflow-x: auto; font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace; font-size: .8rem; line-height: 1.7; position: relative; white-space: pre; }
-.css-block .copy-btn { position: absolute; top: 12px; right: 12px; }
+/* CSS Output — 墨板 */
+.css-block { background: var(--ui-ink); color: #DDD9CD; padding: 20px 24px; border-radius: var(--ui-radius-lg); border: 1px solid #33333A; overflow-x: auto; font-family: var(--ui-font-mono); font-size: .78rem; line-height: 1.75; position: relative; white-space: pre; }
+.css-block .copy-btn { position: absolute; top: 12px; right: 12px; background: #26262C; color: #E8E5DB; border: 1px solid #3D3D45; }
 .css-block code { display: block; }
-.token-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-.token-table th { text-align: left; padding: 10px 14px; background: var(--ui-bg); font-size: .75rem; font-weight: 700; color: var(--ui-text-secondary); text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid var(--ui-border); }
+.token-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.token-table th { text-align: left; padding: 10px 14px; background: var(--ui-bg); font-size: .68rem; font-weight: 600; color: var(--ui-text-secondary); font-family: var(--ui-font-mono); letter-spacing: .04em; border-bottom: 1px solid var(--ui-border-strong); }
 .token-table td { padding: 8px 14px; border-bottom: 1px solid var(--ui-border); }
 .token-table .color-cell { display: flex; align-items: center; gap: 8px; }
-.token-table .color-dot { width: 20px; height: 20px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.08); }
-.token-table code { font-family: "SF Mono", "Fira Code", monospace; font-size: .8rem; background: #F1F3F5; padding: 1px 6px; border-radius: 3px; }
+.token-table .color-dot { width: 20px; height: 20px; border-radius: 2px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.1); }
+.token-table code { font-family: var(--ui-font-mono); font-size: .74rem; background: var(--ui-bg); padding: 1px 6px; border-radius: 2px; }
 
 /* Empty state */
-.empty-hint { text-align: center; padding: 48px 24px; color: var(--ui-text-muted); }
-.empty-hint .icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-hint { text-align: center; padding: 48px 24px; color: var(--ui-text-muted); font-size: .86rem; }
 
 /* Misc */
-.note { font-size: .78rem; color: var(--ui-text-muted); margin-top: 8px; line-height: 1.5; }
-summary { cursor: pointer; font-weight: 600; font-size: .88rem; padding: 4px 0; }
+.note { font-size: .74rem; color: var(--ui-text-muted); margin-top: 8px; line-height: 1.55; }
+
+/* Logo 取色区 */
+.drop-zone { border: 1.5px dashed var(--ui-border-strong); border-radius: var(--ui-radius-lg); padding: 22px; text-align: center; cursor: pointer; background: var(--ui-surface); margin-bottom: 14px; transition: border-color .2s, background .2s; }
+
+/* 60-30-10 定理可视化 */
+.golden-rule { margin-bottom: 20px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); overflow: hidden; background: var(--ui-surface); }
+.golden-rule-bands { display: flex; height: 26px; }
+.golden-rule-bands .gr-band { display: block; min-width: 0; }
+.golden-rule-labels { display: flex; justify-content: space-between; padding: 5px 10px; border-top: 1px solid var(--ui-border); font-family: var(--ui-font-mono); font-size: .62rem; color: var(--ui-text-muted); letter-spacing: .06em; }
+.drop-zone:hover { border-color: var(--ui-accent); }
+.drop-zone.dragover { border-color: var(--ui-accent); background: var(--ui-accent-soft); }
+.drop-zone .dz-icon { margin-bottom: 6px; color: var(--ui-accent); display: inline-flex; }
+
+/* 设计约定规则条 */
+.rules-strip { display: flex; flex-direction: column; gap: 7px; padding: 14px 18px; background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); margin-bottom: 22px; font-size: .78rem; color: var(--ui-text-secondary); }
+.rules-strip-title { font-size: .74rem; font-weight: 700; color: var(--ui-text); margin-bottom: 2px; font-family: var(--ui-font-display); }
+.rules-strip-title .rs-hint { font-weight: 400; color: var(--ui-text-muted); font-family: var(--ui-font-body); }
+.rules-strip-item { line-height: 1.6; }
+.rules-strip-item .rs-k { font-family: var(--ui-font-mono); font-size: .74rem; color: var(--ui-accent); font-weight: 600; margin-right: 6px; }
+
+/* 全屏预览覆盖层（示例占满整个视口，tokens 实时生效） */
+.fs-open { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ui-accent); border-radius: var(--ui-radius); background: var(--ui-accent-soft); color: var(--ui-accent); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); letter-spacing: .04em; transition: background .15s, color .15s; }
+.fs-open:hover { background: var(--ui-accent); color: #FFF; }
+#fullscreen-overlay { position: fixed; inset: 0; z-index: 2000; display: none; overflow-y: auto; background: var(--color-bg-primary); color: var(--color-text-primary); }
+#fullscreen-overlay.open { display: block; }
+#fullscreen-overlay * { box-sizing: border-box; }
+/* 全屏下内容列加宽，标题随视口放大——窄条居中在宽屏上会显得空 */
+#fullscreen-overlay .ce-landing { max-width: min(1120px, 94vw); padding-top: var(--space-4xl); }
+#fullscreen-overlay .ce-hero-title { font-size: clamp(1.85rem, 5vw, 3.4rem); }
+#fullscreen-overlay .ce-app { min-height: 100vh; border: none; border-radius: 0; }
+.fs-toolbar { position: fixed; top: 14px; right: 14px; z-index: 2001; display: flex; align-items: center; gap: 6px; background: var(--ui-surface); border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius); box-shadow: var(--ui-shadow-lg); padding: 5px; font-family: var(--ui-font-mono); }
+.fs-hint { font-size: .6rem; color: var(--ui-text-muted); letter-spacing: .08em; padding: 0 6px; }
+.fs-close { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1px solid var(--ui-border-strong); border-radius: 2px; background: none; color: var(--ui-accent); font-size: .7rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); }
+.fs-close:hover { background: var(--ui-accent-soft); border-color: var(--ui-accent); }
+@media (max-width: 560px) { .fs-hint { display: none; } }
+
+/* Spacing Visualization */
+.space-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+.space-bar-label { width: 90px; font-size: .74rem; font-weight: 600; color: var(--ui-text-secondary); text-align: right; flex-shrink: 0; }
+.space-bar { height: 22px; background: var(--ui-accent); border-radius: 1px; opacity: .8; transition: transform .3s cubic-bezier(.22,.9,.3,1); transform-origin: left center; min-width: 3px; flex-shrink: 0; }
+.space-bar-value { font-size: .74rem; color: var(--ui-text); font-family: var(--ui-font-mono); flex-shrink: 0; width: 52px; }
+.space-bar-rem { font-size: .68rem; color: var(--ui-text-muted); font-family: var(--ui-font-mono); flex-shrink: 0; width: 66px; }
+.space-bar-pct { font-size: .68rem; color: var(--ui-text-muted); flex-shrink: 0; width: 36px; text-align: right; }
+.space-bar-group { margin-bottom: 20px; }
+.space-bar-group-label { font-size: .68rem; font-weight: 600; color: var(--ui-text-muted); font-family: var(--ui-font-mono); letter-spacing: .06em; margin-bottom: 8px; padding-left: 102px; text-transform: uppercase; }
+.space-preview-card { background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); overflow: hidden; }
+.space-preview-row { display: flex; align-items: center; border-bottom: 1px solid var(--ui-border); }
+.space-preview-row:last-child { border-bottom: none; }
+.space-preview-label { width: 120px; padding: 8px 12px; font-size: .74rem; font-weight: 600; color: var(--ui-text-secondary); flex-shrink: 0; background: rgba(28,28,32,.025); }
+.space-preview-visual { padding: 8px 0; display: flex; align-items: center; }
+.space-preview-visual .inner-box { background: var(--ui-accent); opacity: .18; border-radius: 1px; height: 20px; }
+
+/* 双向高亮 */
+.swatch.highlight { outline: 2px solid var(--ui-accent); outline-offset: 2px; border-radius: 4px; z-index: 10; position: relative; }
+.demo-highlight { outline: 2px dashed var(--ui-accent); outline-offset: 2px; }
+
+summary { cursor: pointer; font-weight: 600; font-size: .86rem; padding: 4px 0; color: var(--ui-text-secondary); }
 summary:hover { color: var(--ui-accent); }
 details[open] summary { margin-bottom: 12px; }
+
+@media (max-width: 640px) {
+  .container { padding: 0 16px; }
+  .card { padding: 18px; }
+}
 </style>
 </head>
 <body>
+<!--
+  THESIS: 白光进棱镜散成整条光谱——品牌色进系统，散成整套色阶。
+  OWN-WORLD: 纸面光谱图——纸白地面、墨灰发丝线、发丝刻度尺与 tabular 数字；光谱红是唯一强调，
+  光谱带只出现在语义位置；倒角 3px、无圆角胶囊；展示用 Geologica，正文系统栈，数据用 IBM Plex Mono。
+  STORY: 访客理解「美学可被推导」，相信输入品牌色即可得到完整可用的设计系统，然后动手生成并复制导出。
+  FIRST VIEWPORT: 纸白页面上，棱镜三角将品牌光散成 60-30-10 色阶带，主操作「生成色彩系统」是唯一的高对比按钮。
+  FORM: 我自拟 7 个接地方向中的第 7 个（光谱世界），seed key 17b843f1。
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
 
 <div class="header">
   <div class="header-inner">
+    <svg class="prism" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 17L10.5 5h3L20 17" stroke="var(--ui-accent)" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M8.5 17L12 9l3.5 8" stroke="var(--ui-text)" stroke-width="1.1" stroke-linejoin="round" opacity=".4"/>
+    </svg>
     <h1>Color Engine</h1>
     <span class="badge">UI 色彩系统生成器</span>
-    <span style="flex:1"></span>
-    <span style="font-size:.78rem;color:var(--ui-text-muted)">品牌色 → 强调色 → 中性色 → 辅助色 → 功能色 → Token</span>
+    <span class="chain">品牌色 → 强调色 → 中性色 → 辅助色 → 功能色 → <b>Token</b></span>
   </div>
 </div>
 
@@ -157,11 +244,25 @@ details[open] summary { margin-bottom: 12px; }
       <div class="section-title"><span class="num">1</span> 输入 Logo 颜色</div>
 
       <!-- Logo 取色区 -->
-      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('logo-file-input').click()" style="border:2px dashed var(--ui-border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--ui-bg);margin-bottom:20px;transition:all .2s" onmouseenter="this.style.borderColor='var(--ui-accent)';this.style.background='#EEF2FF'" onmouseleave="this.style.borderColor='var(--ui-border)';this.style.background='var(--ui-bg)'">
-        <div style="font-size:1.5rem;margin-bottom:4px">🖼</div>
-        <p style="color:var(--ui-text-secondary);font-size:.84rem;margin:0">拖拽或点击上传 Logo 自动取色</p>
-        <p style="color:var(--ui-text-muted);font-size:.72rem;margin:2px 0 0">提取后自动填入下方色值，也可手动编辑</p>
+      <div class="drop-zone" id="drop-zone">
+        <span class="dz-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5.5-5.5L5 20"/></svg>
+        </span>
+        <p style="color:var(--ui-text-secondary);font-size:.86rem;margin:0">拖拽或点击上传 Logo 自动取色</p>
+        <p style="color:var(--ui-text-muted);font-size:.74rem;margin:2px 0 0">提取后自动填入下方色值，也可手动编辑</p>
         <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoFile(this.files[0])" style="display:none">
+      </div>
+
+      <!-- 60-30-10 定理可视化：中性 60 · 辅助 30 · 强调 10 -->
+      <div class="golden-rule" aria-hidden="true">
+        <div class="golden-rule-bands">
+          <span class="gr-band" style="width:60%;background:var(--color-bg-secondary,#E9E8E2)"></span>
+          <span class="gr-band" style="width:30%;background:var(--color-surface-secondary,#E6E2D4)"></span>
+          <span class="gr-band" style="width:10%;background:var(--color-accent-base,#D6452E)"></span>
+        </div>
+        <div class="golden-rule-labels">
+          <span>60% 中性</span><span>30% 辅助</span><span>10% 强调</span>
+        </div>
       </div>
 
       <div class="input-grid" id="color-inputs">
@@ -181,7 +282,51 @@ details[open] summary { margin-bottom: 12px; }
         <button class="btn btn-outline btn-sm" onclick="addColorInput()">+ 添加颜色</button>
         <button class="btn btn-primary" onclick="generate()">生成色彩系统</button>
       </div>
-      <p class="note">支持 1-4 个品牌色。多色时可填权重百分比（如 60%、25%、15%），不填则均分。点击「生成」后自动选出最佳强调色。</p>
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">场景</span>
+        <div class="theme-toggle-bar" id="register-toggle">
+          <button class="theme-toggle-btn active" data-val="brand" onclick="setRegister('brand', this)">品牌</button>
+          <button class="theme-toggle-btn" data-val="product" onclick="setRegister('product', this)">产品</button>
+        </div>
+        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary);margin-left:8px">色彩策略</span>
+        <div class="theme-toggle-bar" id="strategy-toggle">
+          <button class="theme-toggle-btn" data-val="restrained" onclick="setStrategy('restrained', this)">克制</button>
+          <button class="theme-toggle-btn active" data-val="committed" onclick="setStrategy('committed', this)">投入</button>
+          <button class="theme-toggle-btn" data-val="full-palette" onclick="setStrategy('full-palette', this)">全色板</button>
+          <button class="theme-toggle-btn" data-val="drenched" onclick="setStrategy('drenched', this)">浸染</button>
+        </div>
+        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary);margin-left:8px">间距基准</span>
+        <div class="theme-toggle-bar" id="base-unit-toggle">
+          <button class="theme-toggle-btn active" data-val="4" onclick="setSpaceBaseUnit(4, this)">4px 精细</button>
+          <button class="theme-toggle-btn" data-val="8" onclick="setSpaceBaseUnit(8, this)">8px 标准</button>
+        </div>
+        <span style="font-size:.74rem;color:var(--ui-text-muted)">间距阶梯默认基于 4px 精细网格，与 Tailwind 对齐</span>
+      </div>
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border)">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">实时调色</span>
+          <span style="font-size:.74rem;color:var(--ui-text-muted)">拖动滑块微调强调色，页面实时刷新</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div>
+            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">H <span id="tweak-h-val">240°</span></label>
+            <input type="range" id="tweak-h" min="0" max="360" value="240" step="1" style="width:100%;accent-color:var(--ui-accent)">
+          </div>
+          <div>
+            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">C <span id="tweak-c-val">0.22</span></label>
+            <input type="range" id="tweak-c" min="0" max="0.30" value="0.22" step="0.005" style="width:100%;accent-color:var(--ui-accent)">
+          </div>
+          <div>
+            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">L <span id="tweak-l-val">0.50</span></label>
+            <input type="range" id="tweak-l" min="0.30" max="0.80" value="0.50" step="0.01" style="width:100%;accent-color:var(--ui-accent)">
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn btn-sm btn-outline" onclick="resetTweaks()">重置</button>
+          <span style="font-size:.68rem;color:var(--ui-text-muted);margin-top:6px" id="tweak-status"></span>
+        </div>
+      </div>
+      <p class="note">支持 1-4 个品牌色。多色时可填权重百分比（如 60%、25%、15%），不填则均分。点击「生成」后自动选出最佳强调色，同步生成空间间距 Token。</p>
     </div>
   </section>
 
@@ -193,6 +338,11 @@ details[open] summary { margin-bottom: 12px; }
       <div class="card">
         <div class="section-title"><span class="num">2</span> 分析诊断</div>
         <div id="analysis-content"></div>
+        <div id="detector-summary" style="margin-top:16px"></div>
+        <details id="detector-details" style="margin-top:8px;display:none">
+          <summary>查看 Detector 自检明细</summary>
+          <div id="detector-detail-content" style="margin-top:12px"></div>
+        </details>
       </div>
     </section>
 
@@ -201,8 +351,8 @@ details[open] summary { margin-bottom: 12px; }
       <div class="card">
         <div class="section-title"><span class="num">3</span> 强调色 · 5 级色阶</div>
         <div class="dual-grid">
-          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="accent-light"></div></div>
-          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="accent-dark"></div></div>
+          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="accent-light"></div></div>
+          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="accent-dark"></div></div>
         </div>
       </div>
     </section>
@@ -210,10 +360,10 @@ details[open] summary { margin-bottom: 12px; }
     <!-- Neutral Colors -->
     <section class="section" id="neutral-section">
       <div class="card">
-        <div class="section-title"><span class="num">4</span> 中性色 · 8 级灰阶 <span id="neutral-label" style="font-weight:400;font-size:.78rem;color:var(--ui-text-muted)"></span></div>
+        <div class="section-title"><span class="num">4</span> 中性色 · 8 级灰阶 <span id="neutral-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
         <div class="dual-grid">
-          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="neutral-light"></div></div>
-          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="neutral-dark"></div></div>
+          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="neutral-light"></div></div>
+          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="neutral-dark"></div></div>
         </div>
       </div>
     </section>
@@ -223,28 +373,28 @@ details[open] summary { margin-bottom: 12px; }
       <div class="card">
         <div class="section-title"><span class="num">5</span> 辅助色</div>
         <div class="dual-grid">
-          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="secondary-light"></div></div>
-          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="secondary-dark"></div></div>
+          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="secondary-light"></div></div>
+          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="secondary-dark"></div></div>
         </div>
         <details style="margin-top:16px">
           <summary>查看邻近色备选方案</summary>
           <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">☀ 亮色 · 邻近</span><div class="swatch-grid" id="adjacent-light"></div></div>
-            <div><span class="dual-col-label dark">☾ 暗色 · 邻近</span><div class="swatch-grid" id="adjacent-dark"></div></div>
+            <div><span class="dual-col-label light">亮色 · 邻近</span><div class="swatch-grid" id="adjacent-light"></div></div>
+            <div><span class="dual-col-label dark">暗色 · 邻近</span><div class="swatch-grid" id="adjacent-dark"></div></div>
           </div>
         </details>
         <details style="margin-top:12px">
           <summary>查看冷暖对比方案（温度反差辅助）</summary>
           <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">☀ 亮色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-light"></div></div>
-            <div><span class="dual-col-label dark">☾ 暗色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-dark"></div></div>
+            <div><span class="dual-col-label light">亮色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-light"></div></div>
+            <div><span class="dual-col-label dark">暗色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-dark"></div></div>
           </div>
         </details>
         <details style="margin-top:12px">
           <summary>查看纯灰色方案（内容型产品适用）</summary>
           <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">☀ 亮色 · 灰色</span><div class="swatch-grid" id="gray-secondary-light"></div></div>
-            <div><span class="dual-col-label dark">☾ 暗色 · 灰色</span><div class="swatch-grid" id="gray-secondary-dark"></div></div>
+            <div><span class="dual-col-label light">亮色 · 灰色</span><div class="swatch-grid" id="gray-secondary-light"></div></div>
+            <div><span class="dual-col-label dark">暗色 · 灰色</span><div class="swatch-grid" id="gray-secondary-dark"></div></div>
           </div>
         </details>
       </div>
@@ -255,8 +405,42 @@ details[open] summary { margin-bottom: 12px; }
       <div class="card">
         <div class="section-title"><span class="num">6</span> 功能色</div>
         <div class="dual-grid">
-          <div><span class="dual-col-label light">☀ 亮色模式</span><div class="swatch-grid" id="functional-light"></div></div>
-          <div><span class="dual-col-label dark">☾ 暗色模式</span><div class="swatch-grid" id="functional-dark"></div></div>
+          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="functional-light"></div></div>
+          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="functional-dark"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spacing Scale -->
+    <section class="section" id="spacing-section">
+      <div class="card">
+        <div class="section-title"><span class="num">7</span> 间距系统 · 12 级阶梯 <span id="spacing-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
+        <div class="dual-grid">
+          <div>
+            <div class="space-bar-group">
+              <div class="space-bar-group-label">基础阶梯 (px)</div>
+              <div id="spacing-scale-light"></div>
+            </div>
+          </div>
+          <div>
+            <div class="space-bar-group">
+              <div class="space-bar-group-label">语义应用预览</div>
+              <div id="spacing-preview-viz"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spacing Semantic Tokens -->
+    <section class="section" id="spacing-tokens-section">
+      <div class="card">
+        <div class="section-title"><span class="num">8</span> 间距语义 Token</div>
+        <div style="overflow-x:auto">
+          <table class="token-table" id="space-token-table">
+            <thead><tr><th>Token 名称</th><th>px 值</th><th>rem 值</th><th>映射自</th><th>用途</th></tr></thead>
+            <tbody id="space-token-table-body"></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -264,12 +448,34 @@ details[open] summary { margin-bottom: 12px; }
     <!-- Component Showcase -->
     <section class="section" id="components-section">
       <div class="card" id="comp-preview-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <div class="section-title" style="margin-bottom:0"><span class="num">7</span> 组件案例</div>
-          <div class="theme-toggle-bar" id="theme-toggle">
-            <button class="theme-toggle-btn active" onclick="setPreviewTheme('light', this)">☀ 亮色</button>
-            <button class="theme-toggle-btn" onclick="setPreviewTheme('dark', this)">☾ 暗色</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:14px;flex-wrap:wrap">
+          <div class="section-title" style="margin-bottom:0"><span class="num">9</span> 组件案例</div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div class="theme-toggle-bar" id="demo-type-toggle">
+              <button class="theme-toggle-btn active" data-val="landing" onclick="setDemoType('landing', this)">着陆页</button>
+              <button class="theme-toggle-btn" data-val="app" onclick="setDemoType('app', this)">工作台</button>
+            </div>
+            <div class="theme-toggle-bar" id="demo-style-toggle">
+              <button class="theme-toggle-btn active" data-val="spectrum" onclick="setDemoStyle('spectrum', this)">光谱</button>
+              <button class="theme-toggle-btn" data-val="standard" onclick="setDemoStyle('standard', this)">标准</button>
+              <button class="theme-toggle-btn" data-val="soft" onclick="setDemoStyle('soft', this)">暖糖</button>
+              <button class="theme-toggle-btn" data-val="glass" onclick="setDemoStyle('glass', this)">流光</button>
+              <button class="theme-toggle-btn" data-val="editorial" onclick="setDemoStyle('editorial', this)">书卷</button>
+            </div>
+            <div class="theme-toggle-bar" id="theme-toggle">
+              <button class="theme-toggle-btn active" data-theme="light" onclick="setPreviewTheme('light', this)">亮色</button>
+              <button class="theme-toggle-btn" data-theme="dark" onclick="setPreviewTheme('dark', this)">暗色</button>
+            </div>
+            <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
           </div>
+        </div>
+        <div class="rules-strip">
+          <div class="rules-strip-title">光谱世界 · 设计约定 <span class="rs-hint">（让页面不丑的最低标准，组件 CSS 导出时一并带走）</span></div>
+          <div class="rules-strip-item"><b class="rs-k">01 强调是例外</b>一屏只给主按钮 / 链接 / 选中态；彩色只出现在语义位置，中性承担全部结构</div>
+          <div class="rules-strip-item"><b class="rs-k">02 字体有声音</b>展示字体 + 正文成对；数据用等宽 tabular 数字，别让同一字重从头走到尾</div>
+          <div class="rules-strip-item"><b class="rs-k">03 组内紧、组间松</b>标题组内 8px，卡片内 24px，区块间 ≥ 48px；宁可空，不可挤</div>
+          <div class="rules-strip-item"><b class="rs-k">04 深度靠阴影不靠色</b>发丝边框 + 偏移阴影；不叠圆角胶囊、不用渐变文字</div>
+          <div class="rules-strip-item"><b class="rs-k">05 禁止 AI 俗套</b>图标卡平铺、眉题 eyebrow、灰底灰字、卡片套卡片——一行都不留</div>
         </div>
         <div id="component-demo">
           <!-- Dynamically filled -->
@@ -277,12 +483,19 @@ details[open] summary { margin-bottom: 12px; }
       </div>
     </section>
 
-    <!-- CSS Output -->
+    <!-- Token Export -->
     <section class="section" id="css-section">
       <div class="card">
-        <div class="section-title"><span class="num">8</span> CSS 变量导出</div>
+        <div class="section-title"><span class="num">10</span> Token 导出</div>
+        <div class="theme-toggle-bar" id="export-toggle" style="margin-bottom:14px">
+          <button class="theme-toggle-btn active" data-val="css" onclick="setExportFormat('css', this)">CSS 变量</button>
+          <button class="theme-toggle-btn" data-val="component" onclick="setExportFormat('component', this)">组件 CSS</button>
+          <button class="theme-toggle-btn" data-val="prompt" onclick="setExportFormat('prompt', this)">风格提示词</button>
+          <button class="theme-toggle-btn" data-val="tailwind" onclick="setExportFormat('tailwind', this)">Tailwind</button>
+          <button class="theme-toggle-btn" data-val="json" onclick="setExportFormat('json', this)">JSON Tokens</button>
+        </div>
         <div class="css-block" id="css-output-block">
-          <button class="btn btn-sm btn-outline copy-btn" onclick="copyCSS()" style="position:absolute;top:12px;right:12px;background:#334155;color:#E2E8F0;border-color:#475569">复制全部</button><code id="css-code"></code>
+          <button class="btn btn-sm btn-outline copy-btn" onclick="copyCSS()">复制全部</button><code id="css-code"></code>
         </div>
         <details style="margin-top:16px">
           <summary>查看 Token 对照表</summary>
@@ -301,9 +514,29 @@ details[open] summary { margin-bottom: 12px; }
 
 <style id="generated-tokens"></style>
 
+<!-- 全屏预览覆盖层：克隆当前示例，占满整个视口 -->
+<div id="fullscreen-overlay">
+  <div class="fs-toolbar">
+    <span class="fs-hint">ESC 退出</span>
+    <div class="theme-toggle-bar" id="fs-theme-toggle" style="border:none;background:transparent;padding:0">
+      <button class="theme-toggle-btn" data-theme="light" onclick="setPreviewTheme('light', this)">亮色</button>
+      <button class="theme-toggle-btn" data-theme="dark" onclick="setPreviewTheme('dark', this)">暗色</button>
+    </div>
+    <button class="fs-close" onclick="closeFullscreenPreview()">✕ 关闭</button>
+  </div>
+  <div id="fullscreen-demo"></div>
+</div>
+
+<!-- 依赖顺序：数学 → 色阶推导 → 调度 → 间距 → 自检 → 渲染 → 示例 → 导出 → 交互 -->
 <script src="color-math.js"></script>
+<script src="color-engine-palette.js"></script>
 <script src="color-engine-core.js"></script>
-<script src="color-engine-ui.js"></script>
+<script src="space-engine-core.js"></script>
+<script src="detector-engine.js"></script>
+<script src="color-engine-render.js"></script>
+<script src="color-engine-demo.js"></script>
+<script src="color-engine-export.js"></script>
+<script src="color-engine-interact.js"></script>
 <!-- End of Color Engine scripts -->
 
 </body>

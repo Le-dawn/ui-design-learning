@@ -31,14 +31,25 @@ python3 -m http.server 8080
 |------|------|
 | `color-engine.html` | 主页面，包含工具 UI 样式和 HTML 结构 |
 | `color-math.js` | 底层色彩数学引擎：OKLCH ↔ RGB ↔ Hex 转换、APCA 对比度计算 |
-| `color-engine-core.js` | 核心逻辑：色彩诊断、校正、色阶生成、主调度 |
-| `color-engine-ui.js` | 渲染函数与交互逻辑 |
+| `color-engine-palette.js` | 色相分类 · 诊断 · 校正 · 全部色阶推导（纯函数域） |
+| `color-engine-core.js` | 状态 · 实时调色 · 主调度（唯一管线入口） |
+| `space-engine-core.js` | 间距阶梯引擎（4px/8px 基准、12 级阶梯、语义 token） |
+| `detector-engine.js` | 生成后全量自检规则（确定性规则，无需 LLM） |
+| `color-engine-render.js` | 渲染函数（分析区/色板/Token 表）与 Token 数据源 |
+| `color-engine-demo.js` | 组件案例系统：同一组 tokens 的 5 种风格世界（光谱/暖糖/流光/书卷/粗野） |
+| `color-engine-export.js` | Token 导出：CSS 变量 / 组件 CSS / 风格提示词 / Tailwind / JSON |
+| `color-engine-interact.js` | 交互 · Logo 取色 · 持久化 · 全屏预览 · 启动 |
 | `color-design-principles.md` | UI 颜色设计原则文档，定义了系统的约束与定理 |
+| `STYLES.md` | 风格指南：5 种风格的提示词、使用场景、反例 |
 
-### 加载顺序
+### 加载顺序（依赖方向：数学 → 推导 → 调度 → 自检 → 渲染 → 示例 → 导出 → 交互）
 
 ```
-color-math.js → color-engine-core.js → color-engine-ui.js
+color-math.js
+→ color-engine-palette.js → color-engine-core.js
+→ space-engine-core.js → detector-engine.js
+→ color-engine-render.js → color-engine-demo.js
+→ color-engine-export.js → color-engine-interact.js
 ```
 
 `color-engine.html` 在 `</body>` 前按上述顺序加载脚本。
