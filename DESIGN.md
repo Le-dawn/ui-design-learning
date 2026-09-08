@@ -16,6 +16,14 @@ colors:
   text-primary: "#23231F"
   text-secondary: "#57544C"
   text-muted: "#7D7A6D"
+  # 工具外壳补充色：代码块 chrome、深色对比块的文字、token 未生成前的兜底表面，
+  # 以及示例默认品牌色（调色滑块未初始化时色块的占位值）
+  board-text-alt: "#E8E5DB"
+  code-chrome: "#26262C"
+  code-chrome-border: "#3D3D45"
+  fallback-surface: "#E9E8E2"
+  fallback-surface-secondary: "#E6E2D4"
+  default-accent: "#2563EB"
 typography:
   display:
     fontFamily: "\"Avenir Next\", \"Bahnschrift\", \"Segoe UI\", -apple-system, BlinkMacSystemFont, \"PingFang SC\", sans-serif"
@@ -30,9 +38,43 @@ typography:
   data:
     fontFamily: "\"SF Mono\", \"Cascadia Code\", Consolas, ui-monospace, Menlo, monospace"
     fontFeature: "tabular-nums"
+  shell-hero:
+    fontFamily: "\"Avenir Next\", \"Bahnschrift\", \"Segoe UI\", -apple-system, BlinkMacSystemFont, \"PingFang SC\", sans-serif"
+    fontSize: "clamp(1.85rem, 5vw, 3.4rem)"
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: "-0.02em"
+  # 示例页（组件参考层）字号阶梯：color-engine-demo.js 用这一档渲染工具演示的
+  # 成品页面（PULSE 营销页、NEXUS 工作台、知识库样例）。它比工具外壳的
+  # display/body/data 三个角色细密，因为示例页要呈现真实产品的信息密度：
+  # 图注、编号、指标、行状态各占一档。生成页面的角色字号由 --type-* token
+  # 在用途层覆盖，这一档只决定组件参考层的基准。
+  scale:
+    micro-label: "0.6rem"     # 徽标副标题、图版编号
+    legend: "0.62rem"         # 侧栏页脚、图例、指标标签
+    caption: "0.64rem"        # 图注、面板计数、应用副标题
+    footnote: "0.66rem"       # 页脚、页首元信息、引用署名
+    status: "0.68rem"         # 状态标记
+    key: "0.7rem"             # 目录键、时间、用户
+    time: "0.72rem"           # 行时间、指标变化
+    row-status: "0.74rem"     # 行状态、目标编号
+    row: "0.78rem"            # 行标识、空状态、面板行
+    control: "0.8rem"         # 输入框、窗口行、目标行
+    nav: "0.84rem"            # 小按钮、导航、侧栏项、面板标题、特性正文
+    link: "0.9rem"            # 文字链接
+    logo: "0.92rem"           # 徽标名、分栏正文
+    button-lg: "0.95rem"      # 大按钮
+    hero-sub: "0.98rem"       # 首屏副标题
+    app-title: "1.02rem"      # 应用标题
+    quote: "1.12rem"          # 引用
+    plate-title: "1.25rem"    # 图版 / 分栏标题
+    metric: "1.55rem"         # 指标数字
 rounded:
-  sm: "3px"
-  lg: "6px"
+  hairline: "1px"   # 进度条、细标记
+  chip: "2px"       # 标签、色点、徽标
+  sm: "3px"         # 按钮、输入框
+  inner: "4px"      # 嵌套表面、对比色块
+  lg: "6px"         # 卡片、浮层
 spacing:
   xs: "4px"
   sm: "8px"
@@ -82,6 +124,8 @@ components:
 > 同一日期的第二阶段：色彩策略作用于整块区域（`brand` / `auxiliary` / `canvas`），区域类在局部重映射语义变量；面积比例是策略建议而非硬指标，配对色在最终 Hex 上验证对比度。
 >
 > 同一日期的第三阶段：字体角色分中文展示 / 中文正文 / 拉丁展示 / 数字数据，交付顺序为平台原生中文字体优先、Noto（OFL-1.1）作为确定回退；排版角色、中文行宽、标点与 `tabular-nums` 规则见 `STYLES.md` 与 `tests/evidence/README.md`。
+>
+> 关于字号：本文 frontmatter 的 `typography.display/body/data` 描述**工具外壳**（这个生成器页面）。`typography.scale` 描述**示例页的组件参考层**（工具演示的成品页面），两套阶梯并存是有意的——外壳只要三个角色，示例页需要细密的信息密度。生成页面的角色字号不取这两套，而由 `--type-*` token 按用途解析。
 
 ## Overview
 
