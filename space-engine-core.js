@@ -37,7 +37,8 @@ function generateSpaceScale(baseUnit) {
 
 // ── 语义 Token 映射 ──────────────────────────────────
 
-function generateSpaceSemanticTokens(scale) {
+function generateSpaceSemanticTokens(scale, profile) {
+  const mode = (profile || resolveDesignProfile(currentDesignOptions())).surface;
   const find = function(stepName) {
     return scale.find(function(item) { return item.name === stepName; }) || scale[0];
   };
@@ -47,12 +48,12 @@ function generateSpaceSemanticTokens(scale) {
     { token: '--space-button-padding-y',    from: find('space-sm'),   usage: '按钮上下内边距' },
     { token: '--space-input-padding-x',     from: find('space-md'),   usage: '输入框左右内边距' },
     { token: '--space-input-padding-y',     from: find('space-sm'),   usage: '输入框上下内边距' },
-    { token: '--space-card-padding',        from: find('space-lg'),   usage: '卡片内边距' },
+    { token: '--space-card-padding',        from: find(mode.panelStep),   usage: mode.name + '内容表面内边距' },
     { token: '--space-card-gap',            from: find('space-md'),   usage: '卡片间水平间距' },
-    { token: '--space-section-gap',         from: find('space-3xl'),  usage: '大区块垂直间距' },
+    { token: '--space-section-gap',         from: find(mode.sectionStep),  usage: mode.name + '区块垂直间距' },
     { token: '--space-container-padding',   from: find('space-lg'),   usage: '页面容器左右留白' },
     { token: '--space-inline-gap',          from: find('space-sm'),   usage: '行内元素横向间距 (gap)' },
-    { token: '--space-stack-gap',           from: find('space-md'),   usage: '堆叠元素纵向间距' },
+    { token: '--space-stack-gap',           from: find(mode.stackStep),   usage: '堆叠元素纵向间距' },
     { token: '--space-icon-size-sm',        from: find('space-md'),   usage: '小图标尺寸' },
     { token: '--space-icon-size-md',        from: find('space-xl'),   usage: '中图标尺寸' },
     { token: '--space-icon-size-lg',        from: find('space-3xl'),  usage: '大图标尺寸' },
@@ -71,5 +72,5 @@ function setSpaceBaseUnit(val, btn) {
   if (btn) btn.classList.add('active');
 
   // 自动重新生成（静默：不滚动、不重置预览主题）
-  if (typeof generate === 'function') generate(true);
+  if (typeof refreshDesignPresentation === 'function') refreshDesignPresentation();
 }

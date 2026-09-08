@@ -332,7 +332,10 @@ function buildTokenMap(sys, spaceScale, spaceSemantics) {
     name: t.token, light: t.from.remStr, dark: '—', pxVal: t.from.px, usage: t.usage, group: 'space-semantic'
   }));
 
-  return colors.concat(spacing, semantic);
+  const designTokens = buildDesignTokens(sys.design, spaceScale);
+  const regionTokens = buildRegionTokens(sys.regions);
+  const replacements = new Set(designTokens.map(t => t.name));
+  return colors.concat(spacing, semantic).filter(t => !replacements.has(t.name)).concat(designTokens, regionTokens);
 }
 
 // ── Token 导出（CSS / Tailwind / JSON 三种格式） ─────
@@ -452,4 +455,3 @@ function renderSpaceSemantics(tokens) {
 }
 
 // ── 工具操作 ────────────────────────────────────────
-

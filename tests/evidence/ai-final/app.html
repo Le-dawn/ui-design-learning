@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>产品团队 · 澄禾工作台</title>
+<meta name="description" content="澄禾演示工作台：产品团队空间的知识记录、继续阅读与最近更新。全部记录为合成示例。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="ce-surface ce-style-standard ce-app-page" data-ce-mode="operate">
+<a class="ce-skip" href="#records">跳到知识记录</a>
+
+<!-- 顶栏：当前空间 + 搜索知识 -->
+<header class="ce-app-topbar">
+  <div class="ce-container ce-topbar-inner">
+    <div class="ce-topbar-lead">
+      <a class="ce-brand" href="landing.html" aria-label="澄禾 · 返回介绍页">
+        <span class="ce-brand-mark" aria-hidden="true">澄</span>
+        <span class="ce-brand-text">澄禾</span>
+      </a>
+      <div class="ce-space">
+        <span class="ce-space-label">当前空间</span>
+        <h1 class="ce-app-title ce-type-title">产品团队</h1>
+      </div>
+    </div>
+
+    <form class="ce-search" role="search" id="search-form">
+      <label class="ce-visually-hidden" for="knowledge-search">搜索知识标题</label>
+      <span class="ce-search-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"></circle><path d="M10.5 10.5 14 14"></path></svg>
+      </span>
+      <input id="knowledge-search" type="search" name="q" autocomplete="off" placeholder="搜索知识标题，例如「引导」或 CSV">
+      <button class="ce-search-clear" type="button" id="search-clear" aria-label="清空搜索关键词" hidden>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4 12 12M12 4 4 12"></path></svg>
+      </button>
+    </form>
+
+    <div class="ce-topbar-actions">
+      <a class="ce-text-link" href="landing.html">返回介绍页</a>
+      <span class="ce-avatar" aria-hidden="true">陈</span>
+    </div>
+  </div>
+</header>
+
+<main class="ce-container ce-app-main">
+
+  <!-- 品牌区域：继续阅读 + 最近更新（工作台唯一上色区域，承担重点内容） -->
+  <section class="ce-region-brand ce-focus" aria-labelledby="focus-title">
+    <h2 class="ce-visually-hidden" id="focus-title">继续阅读与最近更新</h2>
+
+    <div class="ce-focus-continue">
+      <p class="ce-kicker">继续阅读</p>
+      <h3 class="ce-focus-title ce-type-title">
+        <a class="ce-focus-link" href="#records" data-jump="record-1">面向新注册团队的首日引导流程调整说明与后续观察计划</a>
+      </h3>
+      <p class="ce-focus-excerpt">注册后的引导从 4 步压缩为 3 步，第 2 步提前展示示例数据；本文记录改动原因、灰度范围与后续观察指标。</p>
+      <p class="ce-focus-meta">作者 林澈<span class="ce-sep" aria-hidden="true">·</span>更新 <span class="ce-row-time">2026-08-28 14:20</span><span class="ce-sep" aria-hidden="true">·</span>版本 <span class="ce-type-data">v4</span><span class="ce-sep" aria-hidden="true">·</span>进度 <span class="ce-type-data">第 3 节 / 共 7 节</span></p>
+      <div class="ce-focus-actions">
+        <a class="ce-btn ce-btn-primary" href="#records" data-jump="record-1">继续阅读</a>
+        <a class="ce-btn ce-btn-ghost" href="#records" data-jump="record-1" data-expand="1">查看版本记录</a>
+      </div>
+    </div>
+
+    <div class="ce-focus-recent">
+      <div class="ce-focus-recent-head">
+        <p class="ce-kicker">最近更新</p>
+        <a class="ce-text-link" href="#records" data-reset="1">查看全部 <span class="ce-type-data">6</span> 条</a>
+      </div>
+      <ul class="ce-recent-list" role="list">
+        <li>
+          <button class="ce-recent-item" type="button" data-jump="record-1">
+            <span class="ce-recent-title">面向新注册团队的首日引导流程调整说明与后续观察计划</span>
+            <span class="ce-recent-meta"><span class="ce-row-time">08-28 14:20</span> · 林澈</span>
+          </button>
+        </li>
+        <li>
+          <button class="ce-recent-item" type="button" data-jump="record-2">
+            <span class="ce-recent-title">订单导出接口 order.export v2 与 CSV 字段变更说明</span>
+            <span class="ce-recent-meta"><span class="ce-row-time">08-26 10:05</span> · 周维</span>
+          </button>
+        </li>
+        <li>
+          <button class="ce-recent-item" type="button" data-jump="record-3">
+            <span class="ce-recent-title">客服工单分类口径（试行版）</span>
+            <span class="ce-recent-meta"><span class="ce-row-time">08-25 17:40</span> · 何雨</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="ce-app-grid">
+
+    <!-- 知识记录 -->
+    <section class="ce-panel" id="records" aria-labelledby="records-title">
+      <div class="ce-panel-head">
+        <div>
+          <h2 class="ce-panel-title" id="records-title">知识记录</h2>
+          <p class="ce-app-sub">演示空间 · 产品团队</p>
+        </div>
+        <p class="ce-panel-count" id="list-count" role="status" aria-live="polite">共 <span class="ce-metric-num">6</span> 条记录</p>
+      </div>
+
+      <div class="ce-filter-bar" role="group" aria-label="按状态筛选知识记录">
+        <button class="ce-chip" type="button" data-filter="all" aria-pressed="true">全部 <span class="ce-type-data">6</span></button>
+        <button class="ce-chip" type="button" data-filter="published" aria-pressed="false">已发布 <span class="ce-type-data">3</span></button>
+        <button class="ce-chip" type="button" data-filter="pending" aria-pressed="false">待整理 <span class="ce-type-data">2</span></button>
+        <button class="ce-chip" type="button" data-filter="draft" aria-pressed="false">草稿 <span class="ce-type-data">1</span></button>
+      </div>
+
+      <ul class="ce-record-list" id="record-list" role="list">
+
+        <li class="ce-record" data-record data-id="record-1" data-status="published" data-title="面向新注册团队的首日引导流程调整说明与后续观察计划">
+          <button class="ce-record-main" type="button" id="rec-btn-1" aria-expanded="false" aria-controls="rec-detail-1">
+            <span class="ce-record-title ce-type-label">面向新注册团队的首日引导流程调整说明与后续观察计划</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-success"><i class="ce-dot" aria-hidden="true"></i>已发布</span>
+              <span>作者 林澈</span>
+              <span class="ce-row-time">2026-08-28 14:20</span>
+              <span class="ce-version-tag ce-type-data">v4</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-1" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">注册后的引导从 4 步压缩为 3 步，第 2 步提前展示示例数据；本文说明改动原因、灰度范围与后续观察指标。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v4</span><span class="ce-version-note">补充灰度范围与回滚方案</span><span class="ce-version-meta">2026-08-28 · 林澈</span></li>
+                <li><span class="ce-version-tag ce-type-data">v3</span><span class="ce-version-note">调整第 2 步示例数据的出现时机</span><span class="ce-version-meta">2026-08-21 · 林澈</span></li>
+                <li><span class="ce-version-tag ce-type-data">v2</span><span class="ce-version-note">增加新团队分支流程</span><span class="ce-version-meta">2026-08-14 · 周维</span></li>
+                <li><span class="ce-version-tag ce-type-data">v1</span><span class="ce-version-note">初稿</span><span class="ce-version-meta">2026-08-08 · 林澈</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">新注册团队为什么看不到示例数据？</span><span class="ce-qa-src">来自 2026-08-19 的产品讨论</span></span>
+                </li>
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">引导第 3 步的跳过率偏高怎么办？</span><span class="ce-qa-src">来自 2026-08-25 的周会记录</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="ce-record" data-record data-id="record-2" data-status="published" data-title="订单导出接口 order.export v2 与 CSV 字段变更说明">
+          <button class="ce-record-main" type="button" id="rec-btn-2" aria-expanded="false" aria-controls="rec-detail-2">
+            <span class="ce-record-title ce-type-label">订单导出接口 order.export v2 与 CSV 字段变更说明</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-success"><i class="ce-dot" aria-hidden="true"></i>已发布</span>
+              <span>作者 周维</span>
+              <span class="ce-row-time">2026-08-26 10:05</span>
+              <span class="ce-version-tag ce-type-data">v2</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-2" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">order.export v2 新增 cursor 分页与 CSV 表头字段映射；旧字段保留到 v3 接口，字段含义与取值范围见记录正文。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v2</span><span class="ce-version-note">补充 CSV 字段映射与空值处理</span><span class="ce-version-meta">2026-08-26 · 周维</span></li>
+                <li><span class="ce-version-tag ce-type-data">v1</span><span class="ce-version-note">初稿</span><span class="ce-version-meta">2026-08-19 · 周维</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">导出的 CSV 表头为什么会多出 BOM？</span><span class="ce-qa-src">来自 2026-08-24 的支持讨论</span></span>
+                </li>
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">cursor 分页什么时候返回空字符串？</span><span class="ce-qa-src">来自 2026-08-25 的接口答疑</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="ce-record" data-record data-id="record-3" data-status="pending" data-title="客服工单分类口径（试行版）">
+          <button class="ce-record-main" type="button" id="rec-btn-3" aria-expanded="false" aria-controls="rec-detail-3">
+            <span class="ce-record-title ce-type-label">客服工单分类口径（试行版）</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-warning"><i class="ce-dot" aria-hidden="true"></i>待整理</span>
+              <span>作者 何雨</span>
+              <span class="ce-row-time">2026-08-25 17:40</span>
+              <span class="ce-version-tag ce-type-data">v1</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-3" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">客服工单的一级分类从 6 类调整为 5 类，合并「退款」与「售后」；本文是试行口径，历史数据映射待补充。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v1</span><span class="ce-version-note">初稿（待整理）</span><span class="ce-version-meta">2026-08-25 · 何雨</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">历史工单是否需要重新归类？</span><span class="ce-qa-src">来自 2026-08-25 的客服周会</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="ce-record" data-record data-id="record-4" data-status="published" data-title="移动端离线缓存策略评审记录">
+          <button class="ce-record-main" type="button" id="rec-btn-4" aria-expanded="false" aria-controls="rec-detail-4">
+            <span class="ce-record-title ce-type-label">移动端离线缓存策略评审记录</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-success"><i class="ce-dot" aria-hidden="true"></i>已发布</span>
+              <span>作者 林澈</span>
+              <span class="ce-row-time">2026-08-22 09:15</span>
+              <span class="ce-version-tag ce-type-data">v3</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-4" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">移动端离线缓存的过期策略与手动刷新入口；结论：缓存 7 天，首屏优先读本地，刷新入口放在设置页顶部。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v3</span><span class="ce-version-note">补充手动刷新入口</span><span class="ce-version-meta">2026-08-22 · 林澈</span></li>
+                <li><span class="ce-version-tag ce-type-data">v2</span><span class="ce-version-note">调整缓存时长</span><span class="ce-version-meta">2026-08-16 · 周维</span></li>
+                <li><span class="ce-version-tag ce-type-data">v1</span><span class="ce-version-note">初稿</span><span class="ce-version-meta">2026-08-11 · 林澈</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">离线状态下能否编辑？</span><span class="ce-qa-src">来自 2026-08-20 的移动端讨论</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="ce-record" data-record data-id="record-5" data-status="draft" data-title="会员等级权益页文案草稿">
+          <button class="ce-record-main" type="button" id="rec-btn-5" aria-expanded="false" aria-controls="rec-detail-5">
+            <span class="ce-record-title ce-type-label">会员等级权益页文案草稿</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-quiet"><i class="ce-dot" aria-hidden="true"></i>草稿</span>
+              <span>作者 苏明</span>
+              <span class="ce-row-time">2026-08-20 16:30</span>
+              <span class="ce-version-tag ce-type-data">v1</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-5" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">会员等级权益页文案草稿：三个等级的权益说明与升级提示，尚未定稿，等待设计确认后进入评审。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v1</span><span class="ce-version-note">初稿（草稿）</span><span class="ce-version-meta">2026-08-20 · 苏明</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">升级提示的措辞待确认</span><span class="ce-qa-src">来自 2026-08-20 的评论区</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="ce-record" data-record data-id="record-6" data-status="pending" data-title="数据看板指标口径对照表（v0.3）">
+          <button class="ce-record-main" type="button" id="rec-btn-6" aria-expanded="false" aria-controls="rec-detail-6">
+            <span class="ce-record-title ce-type-label">数据看板指标口径对照表（v0.3）</span>
+            <span class="ce-record-caret" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5 8 10.5 12 6.5"></path></svg></span>
+            <span class="ce-record-meta">
+              <span class="ce-badge ce-badge-warning"><i class="ce-dot" aria-hidden="true"></i>待整理</span>
+              <span>作者 周维</span>
+              <span class="ce-row-time">2026-08-18 11:50</span>
+              <span class="ce-version-tag ce-type-data">v0.3</span>
+            </span>
+          </button>
+          <div class="ce-record-detail" id="rec-detail-6" hidden>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">摘要</h4>
+              <p class="ce-type-body">数据看板 12 个指标的统计口径对照，包含 3 个待确认项；v0.3 补充了日活口径的定义与排除规则。</p>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">版本记录</h4>
+              <ol class="ce-timeline">
+                <li><span class="ce-version-tag ce-type-data">v0.3</span><span class="ce-version-note">补充日活口径</span><span class="ce-version-meta">2026-08-18 · 周维</span></li>
+                <li><span class="ce-version-tag ce-type-data">v0.2</span><span class="ce-version-note">修正留存定义</span><span class="ce-version-meta">2026-08-15 · 周维</span></li>
+                <li><span class="ce-version-tag ce-type-data">v0.1</span><span class="ce-version-note">初稿</span><span class="ce-version-meta">2026-08-13 · 周维</span></li>
+              </ol>
+            </div>
+            <div class="ce-detail-block">
+              <h4 class="ce-detail-label ce-type-label">关联问答</h4>
+              <ul class="ce-qa-list">
+                <li class="ce-qa-item">
+                  <span class="ce-qa-mark" aria-hidden="true">问</span>
+                  <span class="ce-qa-body"><span class="ce-qa-q">日活与月活的统计口径是否一致？</span><span class="ce-qa-src">来自 2026-08-17 的数据讨论</span></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+
+      <!-- 空结果与恢复入口 -->
+      <div class="ce-empty" id="list-empty" hidden>
+        <span class="ce-empty-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="14" cy="14" r="8"></circle><path d="M20 20 27 27"></path><path d="M11 14h6"></path></svg>
+        </span>
+        <h3 class="ce-type-label">没有符合条件的记录</h3>
+        <p class="ce-type-meta" id="empty-hint">试试切换状态筛选，或清空搜索关键词。</p>
+        <div class="ce-empty-actions">
+          <button class="ce-btn ce-btn-primary" type="button" id="empty-reset">重置筛选与搜索</button>
+          <button class="ce-btn ce-btn-ghost" type="button" id="empty-clear-query" hidden>清空搜索关键词</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 辅助栏：团队公告 + 待整理记录 -->
+    <aside class="ce-sidebar" aria-label="团队公告与待整理记录">
+
+      <section class="ce-panel" aria-labelledby="notice-title">
+        <div class="ce-panel-head">
+          <h2 class="ce-panel-title" id="notice-title">团队公告</h2>
+          <span class="ce-panel-count ce-type-data">3</span>
+        </div>
+        <ul class="ce-notice-list" role="list">
+          <li class="ce-notice">
+            <p class="ce-notice-text">知识库目录改版：产品团队空间新增「待整理」入口，旧的收件箱已合并。</p>
+            <p class="ce-notice-meta"><span class="ce-row-time">2026-09-02</span> · 空间管理员</p>
+          </li>
+          <li class="ce-notice">
+            <p class="ce-notice-text">每周五 17:00 前清理待整理记录，逾期会在空间首页提醒负责人。</p>
+            <p class="ce-notice-meta"><span class="ce-row-time">2026-08-30</span> · 空间管理员</p>
+          </li>
+          <li class="ce-notice">
+            <p class="ce-notice-text">搜索已支持 API 名称与 CSV 字段名，可以直接搜 order.export 或 CSV。</p>
+            <p class="ce-notice-meta"><span class="ce-row-time">2026-08-27</span> · 林澈</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="ce-panel" aria-labelledby="pending-title">
+        <div class="ce-panel-head">
+          <h2 class="ce-panel-title" id="pending-title">待整理记录</h2>
+          <span class="ce-panel-count ce-type-data">2</span>
+        </div>
+        <ul class="ce-pending-list" role="list">
+          <li class="ce-pending">
+            <p class="ce-pending-title">客服工单分类口径（试行版）</p>
+            <p class="ce-pending-meta">更新 <span class="ce-row-time">2026-08-25 17:40</span> · 何雨</p>
+            <button class="ce-btn ce-btn-ghost ce-btn-sm" type="button" data-filter-jump="pending">去整理</button>
+          </li>
+          <li class="ce-pending">
+            <p class="ce-pending-title">数据看板指标口径对照表（v0.3）</p>
+            <p class="ce-pending-meta">更新 <span class="ce-row-time">2026-08-18 11:50</span> · 周维</p>
+            <button class="ce-btn ce-btn-ghost ce-btn-sm" type="button" data-filter-jump="pending">去整理</button>
+          </li>
+        </ul>
+      </section>
+
+    </aside>
+
+  </div>
+</main>
+
+<footer class="ce-footer">
+  <div class="ce-container ce-footer-inner">
+    <p class="ce-type-meta ce-footer-note">澄禾 · 演示工作台。本页所有记录、时间、版本号与数量均为合成示例，仅用于演示产品形态，不代表任何客户、认证、价格或增长数据。</p>
+    <nav class="ce-footer-links" aria-label="页脚导航">
+      <a class="ce-text-link" href="landing.html">返回介绍页</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

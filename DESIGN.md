@@ -77,6 +77,12 @@ components:
 
 # Design System: Color Engine — 光谱世界
 
+> 2026-09-08 更新：本文记录工具自身与光谱品牌语言。生成产品的页面用途由 `design-profiles.js` 解析；标题、密度、行宽、章节间距与动效按 persuade / operate / read / experience 分配。品牌形状与组件语义共享，本文工具外壳的字号和布局不得强制应用到需求侧的全部页面。
+>
+> 同一日期的第二阶段：色彩策略作用于整块区域（`brand` / `auxiliary` / `canvas`），区域类在局部重映射语义变量；面积比例是策略建议而非硬指标，配对色在最终 Hex 上验证对比度。
+>
+> 同一日期的第三阶段：字体角色分中文展示 / 中文正文 / 拉丁展示 / 数字数据，交付顺序为平台原生中文字体优先、Noto（OFL-1.1）作为确定回退；排版角色、中文行宽、标点与 `tabular-nums` 规则见 `STYLES.md` 与 `tests/evidence/README.md`。
+
 ## Overview
 
 **Creative North Star: "纸面光谱图 — 白光进棱镜，散成整条光谱"**

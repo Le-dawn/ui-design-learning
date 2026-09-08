@@ -4,6 +4,10 @@
    ============================================================ */
 
 let currentStrategy = 'committed'; // 'restrained' | 'committed' | 'full-palette' | 'drenched'
+let strategyExplicit = false;
+let currentAccent = null;
+let lastDiagnoses = [];
+let lastBest = null;
 
 let lastAccentOklch = null;
 
@@ -37,6 +41,7 @@ function retweak(hOverride, cOverride, lOverride) {
 
   // 完整重建色彩系统并渲染（间距保持上次生成值）
   const sys = computeSystem(tweakedOklch, { textOnAccentLight: tweakedAccent.textContrastOnAccent });
+  currentAccent = tweakedAccent;
   renderSystem(sys, window._lastSpaceScale || [], window._lastSpaceSemantics || []);
 
   // 更新分析区强调色信息（按 id 定位，不再误写多色选择区块）
@@ -45,7 +50,7 @@ function retweak(hOverride, cOverride, lOverride) {
 
   // 重跑 Detector，保证实时调色后自检结果不过期
   const detectorResults = runDetector(buildDetectorCtx(tweakedAccent, sys, window._lastSpaceScale || [], window._lastSpaceSemantics || []));
-  renderDetectorSummary(detectorResults);
+  renderAnalysis(lastDiagnoses, lastBest, tweakedAccent, sys.contrastChecks, detectorResults);
 
   // 渲染重建了 DOM 节点，色块↔组件双向高亮需重新绑定
   setupBidirectionalHighlight();
@@ -78,11 +83,27 @@ function accentDetailHTML(accent, mode) {
 }
 
 function setStrategy(val, btn) {
+  if (!DESIGN_STRATEGIES[val]) return;
   currentStrategy = val;
+  strategyExplicit = true;
   var btns = document.querySelectorAll('#strategy-toggle .theme-toggle-btn');
   btns.forEach(function(b) { b.classList.remove('active'); });
   if (btn) btn.classList.add('active');
-  if (typeof generate === 'function') generate(true); // 静默：不滚动、不重置预览主题
+  refreshDesignPresentation();
+}
+
+function refreshDesignPresentation() {
+  if (!currentAccent) return generate(true);
+  const scale = generateSpaceScale(spaceBaseUnit);
+  const sys = computeSystem(currentAccent.oklch, { textOnAccentLight: currentAccent.textContrastOnAccent });
+  const semantics = generateSpaceSemanticTokens(scale, sys.design);
+  renderSystem(sys, scale, semantics);
+  renderSpaceScale(scale);
+  renderSpaceSemantics(semantics);
+  renderAnalysis(lastDiagnoses, lastBest, currentAccent, sys.contrastChecks, runDetector(buildDetectorCtx(currentAccent, sys, scale, semantics)));
+  updateTweakContext();
+  applyToggleState();
+  saveState();
 }
 
 // ── OKLCH 色相分类 & 最优区间 ────────────────────────
@@ -96,6 +117,7 @@ function accentSuitability(oklch) {
 // ── 色彩系统计算（generate 与 retweak 共用的唯一管线） ──
 
 function computeSystem(accentOklch, opts) {
+  const design = resolveDesignProfile({ ...currentDesignOptions(), ...(opts && opts.design), brand: { ...accentOklch } });
   // 物理约束保护：与 computeBeautifulAccent 的 clamp 一致，
   // 防止实时调色拖出破坏色阶单调性（accent-100 固定 L=0.82）或荧光感的越界值
   const ok = {
@@ -106,17 +128,18 @@ function computeSystem(accentOklch, opts) {
 
   const accentScaleLight = generateAccentScaleLight(ok);
   const accentScaleDark = generateAccentScaleDark(ok);
-  const neutralsLight = generateNeutralsLight(ok.H);
-  const neutralsDark = generateNeutralsDark(ok.H);
-  const secondaryLight = generateSecondaryLight(ok);
-  const secondaryDark = generateSecondaryDark(ok);
-  const adjacentLight = generateAdjacentLight(ok);
-  const adjacentDark = generateAdjacentDark(ok);
-  const warmContrastLight = generateWarmContrastLight(ok);
-  const warmContrastDark = generateWarmContrastDark(ok);
+  const neutralsLight = generateNeutralsLight(ok.H, design.strategy);
+  const neutralsDark = generateNeutralsDark(ok.H, design.strategy);
+  const secondaryLight = generateSecondaryLight(ok, design.strategy);
+  const secondaryDark = generateSecondaryDark(ok, design.strategy);
+  const adjacentLight = generateAdjacentLight(ok, design.strategy);
+  const adjacentDark = generateAdjacentDark(ok, design.strategy);
+  const warmContrastLight = generateWarmContrastLight(ok, design.strategy);
+  const warmContrastDark = generateWarmContrastDark(ok, design.strategy);
   const graySecondaryLight = generateGraySecondaryLight();
   const graySecondaryDark = generateGraySecondaryDark();
   const functional = generateFunctionalColors(ok.H);
+  const regions = generateRegionColors(ok, design.strategy);
 
   // 渐变搭档色 accent-2：冷色向紫(+40°)、暖色向红(-40°)，与主色同 C/L，构成品牌渐变对
   const accent2H = ((ok.H + (ok.H >= 180 ? 40 : -40)) + 360) % 360;
@@ -128,8 +151,8 @@ function computeSystem(accentOklch, opts) {
 
   // 浮层表面：亮色与卡片同白（深度交给阴影 shadow-md/lg），暗色比卡片更亮
   // 表面色温峰值随策略缩放（克制 ×0.5 自然得到"产品级"淡色温）
-  const raisedCLight = 0.10 * clamp(0.020 * getStrategyFactor(), 0, 0.028);
-  const raisedCDark = 0.5 * clamp(0.014 * getStrategyFactor(), 0, 0.022);
+  const raisedCLight = 0.10 * clamp(0.020 * getStrategyFactor(design.strategy), 0, 0.028);
+  const raisedCDark = 0.5 * clamp(0.014 * getStrategyFactor(design.strategy), 0, 0.022);
   const surfaceRaised = {
     light: { oklch: { L: 1.0, C: raisedCLight, H: ok.H }, hex: oklchToHex(1.0, raisedCLight, ok.H) },
     dark: { oklch: { L: 0.17, C: raisedCDark, H: ok.H }, hex: oklchToHex(0.17, raisedCDark, ok.H) }
@@ -146,6 +169,8 @@ function computeSystem(accentOklch, opts) {
   const contrastChecks = verifyContrast(neutralsLight, neutralsDark);
 
   return {
+    design,
+    regions,
     accentOklch: ok,
     accentScaleLight, accentScaleDark,
     neutralsLight, neutralsDark,
@@ -182,11 +207,15 @@ function buildDetectorCtx(accent, sys, spaceScale, spaceSemantics) {
 
 function renderSystem(sys, spaceScale, spaceSemantics) {
   const tokens = buildTokenMap(sys, spaceScale, spaceSemantics);
+  window._lastSystem = sys;
+  window._lastTokens = tokens;
+  window._lastSpaceScale = spaceScale;
+  window._lastSpaceSemantics = spaceSemantics;
   renderAccent(sys.accentScaleLight, sys.accentScaleDark);
   renderNeutrals(sys.neutralsLight, sys.neutralsDark);
   renderSecondary(sys.secondaryLight, sys.secondaryDark, sys.adjacentLight, sys.adjacentDark, sys.warmContrastLight, sys.warmContrastDark, sys.graySecondaryLight, sys.graySecondaryDark);
   renderFunctional(sys.functional);
-  renderComponents(tokens);
+  renderComponents(tokens, sys);
   renderExport(sys, tokens);
   renderTokenTable(tokens);
 }
@@ -235,6 +264,9 @@ function generate(silent) {
 
   // Step 3: 计算美丽强调色
   const accent = computeBeautifulAccent(best.oklch);
+  currentAccent = accent;
+  lastDiagnoses = diagnoses;
+  lastBest = best;
   lastAccentOklch = { L: accent.oklch.L, C: accent.oklch.C, H: accent.oklch.H };
 
   // Step 4-9: 完整色彩系统（唯一管线）
@@ -242,7 +274,7 @@ function generate(silent) {
 
   // Step 10: 间距系统生成
   const spaceScale = generateSpaceScale(spaceBaseUnit);
-  const spaceSemantics = generateSpaceSemanticTokens(spaceScale);
+  const spaceSemantics = generateSpaceSemanticTokens(spaceScale, sys.design);
   window._lastSpaceScale = spaceScale;
   window._lastSpaceSemantics = spaceSemantics;
 

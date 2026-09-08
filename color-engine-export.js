@@ -17,306 +17,170 @@ function renderExport(sys, tokens) {
   _lastExport = { sys, tokens };
   const codeEl = document.getElementById('css-code');
   if (currentExportFormat === 'tailwind') {
-    codeEl.textContent = buildTailwindConfig(tokens);
+    codeEl.textContent = buildTailwindConfig(tokens, sys);
   } else if (currentExportFormat === 'json') {
-    codeEl.textContent = buildJSONTokens(tokens);
+    codeEl.textContent = buildJSONTokens(tokens, sys);
   } else if (currentExportFormat === 'component') {
-    codeEl.textContent = buildComponentCSSExport();
+    codeEl.textContent = buildComponentCSSExport(sys);
   } else if (currentExportFormat === 'prompt') {
-    codeEl.textContent = buildStylePromptExport(tokens);
+    codeEl.textContent = buildStylePromptExport(tokens, sys);
   } else {
     codeEl.textContent = buildCSSExport(sys, tokens);
   }
 }
 
-// ── 风格提示词导出：tokens 具体值 + 当前风格 prompt，一键复制丢给 AI ──
-// 风格作用于整个项目（全站），当前示例页只是「先做到位」的主角页面。
-// 维护提示：提示词正文与 STYLES.md 第三节保持同步
-
-const STYLE_PROMPTS = {
-  spectrum: {
-    name: '光谱世界（纸面工业）',
-    body: [
-      '- 表面：纸白底 + 1px 发丝线边框 + 微偏移阴影；3px 小倒角，禁用圆角胶囊',
-      '- 字体：展示用几何无衬线（Avenir Next / Bahnschrift 类系统栈），数据/时间/编号用等宽字体（SF Mono / Cascadia Code 类），数字一律 tabular；别让同一字重从头走到尾',
-      '- 强调色：只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），中性色承担全部结构',
-      '- 装饰：无渐变、无光斑、无 emoji；图形用统一 1.8 描边 SVG 线稿',
-      '- 气质：像天文台控制台、实验室仪器——数据可信，界面退后'
-    ].join('\n')
-  },
-  soft: {
-    name: '暖糖（消费级圆润）',
-    body: [
-      '- 表面：大圆角（14–20px）+ 柔和多层阴影（模糊 10–30px、低透明度）+ 浅色细边框；状态点圆形',
-      '- 字体：圆润无衬线，字距可放宽，少用等宽字体',
-      '- 强调色：可以更活泼——按钮、徽章、图标底都能用，但一屏仍不超过 3 处',
-      '- 微交互：hover 上浮 1px，按压下沉，过渡 150ms',
-      '- 气质：亲切、安全、值得信任，像健康 / 教育类 App'
-    ].join('\n')
-  },
-  glass: {
-    name: '流光（玻璃科技）',
-    body: [
-      '- 表面：半透明玻璃面板（backdrop-filter blur 14–18px）+ 1px 半透明描边 + 大圆角（10–16px）',
-      '- 光效：主 CTA 带强调色辉光（0 0 0 1px 描边 + 8–26px 彩色阴影）；大区块顶部可加径向光斑',
-      '- 字体：现代几何无衬线，标题字距略收紧',
-      '- 气质：AI 产品、未来感、发光但不刺眼'
-    ].join('\n')
-  },
-  editorial: {
-    name: '书卷（编辑内容）',
-    body: [
-      '- 表面：纯色底 + 1px 细线分隔，几乎不用阴影；圆角 2–4px 或直角',
-      '- 字体：衬线显示字体（中文宋体 / 英文 Georgia 类），标题不收紧字距，正文行高 1.7',
-      '- 强调色：全场最多 1 处（链接或 CTA 二选一）',
-      '- 留白：区块间距 ≥ 80px，标题与正文间 8–12px；宁可空，不可挤',
-      '- 气质：杂志、出版社、编辑部'
-    ].join('\n')
-  },
-  standard: {
-    name: '标准（现代 SaaS）',
-    body: [
-      '- 表面：浅底 + 白卡浮起（适中圆角 8–12px + 柔和双层阴影），1px 细边框',
-      '- 字体：系统无衬线（Apple 栈），标题加粗 + 正文常规，数字 tabular；不引入特殊字体',
-      '- 强调色：标准用法——主按钮实色、链接、选中态、焦点环，一屏 ≤ 3 处',
-      '- 交互：hover 轻微上浮 + 阴影加深，active 内凹，过渡 150ms',
-      '- 装饰：无网格、无印章、无光斑、无渐变文字；图标用统一描边 SVG',
-      '- 气质：大多数成熟 SaaS 的通用面貌——干净、可信、不抢戏'
-    ].join('\n')
-  }
-};
-
+// 所有格式消费同一设计结果。品牌固定，用途控制尺度，需求侧决定业务和页面拓扑。
 const TOKEN_GROUP_LABELS = {
   accent: '强调色', neutral: '中性色', state: '交互态', secondary: '辅助色',
-  functional: '功能色', elevation: '阴影与层级', radius: '圆角',
-  typography: '排版', 'space-scale': '间距阶梯', 'space-semantic': '间距语义'
+  functional: '功能色', elevation: '阴影与层级', radius: '形状', typography: '排版',
+  surface: '页面用途', region: '区域配色', font: '字体', 'space-scale': '间距阶梯', 'space-semantic': '间距语义'
 };
-const TOKEN_GROUP_ORDER = ['accent', 'neutral', 'state', 'secondary', 'functional', 'elevation', 'radius', 'typography', 'space-scale', 'space-semantic'];
+const TOKEN_GROUP_ORDER = Object.keys(TOKEN_GROUP_LABELS);
 
-// 项目级页面清单：风格作用于整个项目时的全站骨架（当前示例页为「主角页面」，全站页面同样遵循）
-const PROJECT_PAGES = [
-  { id: 'landing', name: '着陆页', spec: '顶栏导航 + Hero 主视觉 + 内容数据区 + 双栏信息区 + 页脚' },
-  { id: 'app', name: '工作台', spec: '左侧导航 + 顶栏（标题/搜索/用户）+ 内容面板网格' },
-  { id: 'list', name: '列表 / 表格页', spec: '工具栏 + 数据表格（行状态 + 操作列）+ 空状态' },
-  { id: 'form', name: '表单 / 设置页', spec: '分组卡片（标签 + 输入 + 辅助说明）+ 主 / 次按钮区' },
-  { id: 'modal', name: '弹层 / 菜单', spec: '浮层表面 + 阴影过渡 + ESC 关闭' },
-  { id: 'empty', name: '空状态 / 错误页', spec: '图标 + 一句话 + 单个主行动' }
-];
+function exportSystem(sys) {
+  return sys || (_lastExport && _lastExport.sys);
+}
 
-function buildStylePromptExport(tokens) {
-  const style = STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum;
-  const focusPage = currentDemoType === 'app' ? 'app' : 'landing';
-
-  const lines = [];
-  lines.push('# 设计任务：全站统一风格（作用于整个项目）');
-  lines.push('请为整个项目设计一套统一视觉语言：以下风格与 tokens 作用于项目的**全部页面**——' +
-    '着陆页、工作台、列表/表格页、表单/设置页、弹层、空状态都必须遵守，而不是只做一个单页。' +
-    '当前以「' + (focusPage === 'app' ? '工作台' : '着陆页') + '」为主角示例页：先把它完整做到位，其余页面按同一套规则推导。' +
-    '输出全站共享 CSS + 各页面 HTML（亮色 / 暗色 data-theme="dark" 双主题）。');
-  lines.push('');
-  lines.push('## 设计 tokens（必须严格遵守，不得自造颜色 / 间距 / 字号 / 圆角 / 阴影）');
-  lines.push('');
-  TOKEN_GROUP_ORDER.forEach(g => {
-    const items = tokens.filter(t => t.group === g);
+function buildStylePromptExport(tokens, sys) {
+  sys = exportSystem(sys);
+  const d = sys.design;
+  const lines = [
+    '# Web 设计上下文',
+    '将本上下文与需求侧提供的业务需求一起使用。业务、页面数量、内容、功能与事实以需求为准；示例品牌和示例数据不属于需求。',
+    '',
+    '## 品牌共性',
+    '- 风格：' + d.identity.name + '。' + d.identity.character,
+    '- 表面语言：' + d.identity.material,
+    '- 形状：' + d.identity.radius.join(' / ') + '；同类组件全站一致。',
+    '- ' + d.precedence,
+    '- 页面拓扑、内容顺序、主视觉表现形式由真实任务推导；不要机械复刻示例业务或强制双栏 Hero。',
+    '',
+    '## 自动判断页面用途',
+    '先根据每页的主要任务选择下列用途。列表、表单、弹层继承所属页面用途。混合页面以主要任务为准，局部表达保持明确边界。',
+    '当前预览：' + d.surface.name + '；其他页面不必采用同一用途。',
+    '色彩策略：' + (d.strategySource === 'user' ? '用户明确选择“' + DESIGN_STRATEGIES[d.strategy].name + '”，各用途都保留此选择并适配区域。' : '未固定，按每页用途采用其默认策略。'),
+    ''
+  ];
+  Object.entries(DESIGN_MODES).forEach(([mode, m]) => {
+    const p = resolveDesignProfile({ ...d, mode, strategyExplicit: d.strategySource === 'user' });
+    lines.push('### ' + mode + ' / ' + m.name,
+      '- 目的：' + m.purpose,
+      '- 布局：' + m.layout,
+      '- 密度：' + m.density,
+      '- 色彩：' + m.color + ' 当前适用策略：' + DESIGN_STRATEGIES[p.strategy].name + '。',
+      '- 动效：' + m.motion,
+      '- 显示标题 ' + m.displaySize + '；页面标题 ' + m.titleSize + '；正文 ' + m.bodySize + ' / ' + m.bodyLeading + '；正文行宽 ' + m.proseMeasure + '。',
+      '- 页面根节点使用 data-ce-mode="' + mode + '"。', '');
+  });
+  const regionKinds = Object.keys((sys.regions || {themes:{light:{}}}).themes.light);
+  lines.push('## 区域配色',
+    '- 区域角色：brand（品牌主区域）、auxiliary（辅助内容区域）、canvas（画布本身）。区域类：' + (regionKinds.map(k => '.ce-region-' + k).join('、') || '当前策略不铺区域') + '。',
+    '- 把区域类放在页面根或整块区块上；进入区域后，按钮、输入框、链接、边框与焦点环自动换成该区域的配对颜色，不需要为区域内组件另写一套样式。',
+    '- 当前策略：' + DESIGN_STRATEGIES[d.strategy].name + '。' + (sys.regions ? sys.regions.areaNote : ''),
+    '- 区域位置、面积和形状由内容重要性决定，不固定拓扑；不要给每个面板都上色，也不要用颜色数量代替层次。',
+    '- 面积比例是策略建议而非硬指标：营销首屏的品牌区域可以占较大面积，工作台只让承担重点内容的区域上色，阅读页面保持低干扰。',
+    '- 主行动必须与所在区域背景可分辨：品牌背景上用区域行动色，不要用与背景同色的品牌按钮。',
+    '- 功能色（成功、警告、错误、信息）保持语义，不当作分区或装饰颜色；品牌装饰色也不要解释成状态。',
+    '- 区域内文字、次要文字、边框与焦点环成对使用；亮暗主题各自生成层次，不机械反转。',
+    '');
+  const f = STYLE_FONTS[d.style];
+  const stacks = fontStacks(d.style);
+  lines.push('## 字体与中文排版',
+    '- 字体角色：中文展示、中文正文、拉丁展示、数字数据。同一字体可以承担多个角色；不要求五种风格各用一套字体。',
+    '- 当前风格字形：' + f.traits,
+    '- 展示字体：`' + stacks.display + '`',
+    '- 中文正文：`' + stacks.body + '`',
+    '- 数据与代码：`' + stacks.data + '`，配合 font-variant-numeric: tabular-nums。',
+    '- 排版角色：' + Object.values(TYPE_ROLES).map(r => r.label).join(' / ') + '；字号、行高、字距、行宽见下方字体与用途 token。',
+    '- 中文行宽：正文按全角字数控制（' + d.surface.proseMeasure + '），不直接套用英文 65–75ch；阅读页面优先保证行长与段落节奏。',
+    '- 换行与标点：标题平衡断行、不产生单字末行；正文按字换行、行末不孤悬标点；不用写死 <br> 维持布局。',
+    '- 缺字、加载失败与离线：按字体栈的回退顺序落到平台原生中文字体（PingFang SC / Microsoft YaHei / Songti SC），标题不因缺字溢出。',
+    '- 可选品牌展示字体随下方 @font-face 提供（OFL-1.1）；自托管前不影响布局与阅读。',
+    '');
+  lines.push('## 实施与验证',
+    '- 保持品牌、颜色语义和组件语言。优先使用角色变量；内容需要的构图、展示尺寸可在用途范围内推导，新增共性规则须统一命名。',
+    '- 首先确定阅读顺序、主要内容的表现形式和面积，再实现；重要性与视觉重量对应。',
+    '- 有浏览器能力时检查实际首屏和窄屏：主次、字形、区域配色、长文本与交互。修正主要问题后再扩展其余页面；无渲染能力时如实标明未验证。',
+    '- 图形、照片与作品必须服务业务内容；不得虚构商业事实，合成演示明确标注。',
+    '- 交互完整实现默认、悬停、焦点、按压、禁用、加载、错误和空状态。尊重键盘、缩放和减少动态效果偏好。',
+    '', '## 设计变量');
+  TOKEN_GROUP_ORDER.forEach(group => {
+    const items = tokens.filter(t => t.group === group);
     if (!items.length) return;
-    lines.push('### ' + (TOKEN_GROUP_LABELS[g] || g));
-    items.forEach(t => {
-      const isColor = t.light && String(t.light).startsWith('#');
-      if (isColor) {
-        lines.push('- `' + t.name + '`: ' + t.light + '（亮）/ ' + t.dark + '（暗）— ' + t.usage);
-      } else {
-        lines.push('- `' + t.name + '`: ' + t.light + ' — ' + t.usage);
-      }
-    });
-    lines.push('');
+    lines.push('### ' + TOKEN_GROUP_LABELS[group]);
+    items.forEach(t => lines.push('- `' + t.name + '`: ' + t.light + (t.dark && t.dark !== '—' && t.dark !== t.light ? '（亮） / ' + t.dark + '（暗）' : '') + ' — ' + t.usage));
   });
-  lines.push('## 风格');
-  lines.push(style.body);
-  lines.push('');
-  lines.push('## 页面清单（同一风格贯穿全站，每页先按骨架搭结构再填内容）');
-  PROJECT_PAGES.forEach(p => {
-    const mark = p.id === focusPage ? '（当前示例页：先完整做到位）' : '';
-    lines.push('- ' + p.name + '：' + p.spec + mark);
-  });
-  lines.push('');
-  lines.push('## 全站规则');
-  lines.push('- 单一风格源：整个项目只存在这一种风格；所有页面共享同一组 tokens 与同一套组件规范，页内不出现任何未在 tokens 中定义的视觉值');
-  lines.push('- 组件复用：按钮、输入框、卡片、表格、导航等组件全站复用同一实现（见「组件 CSS」导出），不逐页发明、不逐页另起炉灶');
-  lines.push('- 结构先于装饰：每页先按页面清单对应的骨架搭结构，再填内容；不得重排骨架，不得在单页里开「风格分支」');
-  lines.push('');
-  lines.push('## 约束');
-  lines.push('- 只使用上面给出的 tokens，不得自造任何颜色、间距、字号、圆角、阴影');
-  lines.push('- 不用渐变文字；不用 emoji 做图标（用统一描边 SVG）');
-  lines.push('- 阴影必须有偏移 + 模糊（除非风格提示明确要求硬阴影）');
-  lines.push('- 一屏一个主角元素；内容用中文，可参照天文观测 / 数据平台类文案');
-  lines.push('');
-  lines.push('## 参考');
-  lines.push('如需组件级参考代码，请同时复制「组件 CSS」导出并粘贴。');
+  lines.push('', '## 可直接使用的主题与用途 CSS',
+    '外层使用 data-theme="dark" 切换暗色；页面根使用 ce-surface 和对应 data-ce-mode。组件样式可使用单独的“组件 CSS”导出。',
+    '```css', buildCSSExport(sys, tokens), '```');
   return lines.join('\n');
 }
 
-// 组件 CSS：与组件案例页完全同一份样式，配合 CSS 变量复制即用
-function buildComponentCSSExport() {
-  const styleName = (STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum).name;
-  return '/* ═══════════════════════════════════════════\n' +
-    '   Color Engine — 组件 CSS（' + styleName + ' · Solstice 示例）\n' +
-    '   配合「CSS 变量」导出一起使用：先复制 :root / [data-theme="dark"]，再复制本文件\n' +
-    '   字体：系统原生栈，零依赖（展示 Avenir Next / Bahnschrift 类 · 正文系统无衬线 · 数据 SF Mono / Cascadia Code）\n' +
-    '   所有值都引用 CSS 变量，换肤只改变量不碰组件\n' +
-    '\n' +
-    '   光谱世界设计约定（让页面不丑的最低标准）：\n' +
-    '   1. 强调是例外：一屏只给主按钮 / 链接 / 选中态，彩色只在语义位置\n' +
-    '   2. 字体有声音：展示 + 正文成对，数据用等宽 tabular 数字\n' +
-    '   3. 组内紧、组间松：标题组 8px，卡片内 24px，区块间 ≥ 48px\n' +
-    '   4. 深度靠阴影不靠色：发丝边框 + 偏移阴影，不叠圆角胶囊\n' +
-    '   5. 禁止 AI 俗套：图标卡平铺、眉题 eyebrow、渐变文字、卡片套卡片\n' +
-    '   ═══════════════════════════════════════════ */\n\n' +
-    buildDemoCSS().trim() + '\n';
+function buildComponentCSSExport(sys) {
+  sys = exportSystem(sys);
+  const d = sys.design;
+  const kinds = Object.keys((sys.regions || {themes:{light:{}}}).themes.light);
+  return '/* ' + d.identity.name + '组件参考。搭配 CSS 变量导出。\n' +
+    '   页面根：class="ce-surface ce-style-' + d.style + '" data-ce-mode="用途"；业务结构由需求决定。\n\n' +
+    '   同一控件在普通区域与彩色区域：区域类重映射语义变量，按钮、输入框、链接自动适配。\n' +
+    '   <section class="ce-panel">…<button class="ce-btn ce-btn-accent">主操作</button></section>\n' +
+    (kinds.length ? '   <section class="ce-panel ce-region-' + kinds[0] + '">…<button class="ce-btn ce-btn-accent">主操作</button></section>\n' : '') +
+    '   可用区域类：' + (kinds.map(k => '.ce-region-' + k).join('、') || '当前策略不铺区域') + ' */\n' +
+    buildDemoCSS() + demoStyleCSS(d.style) + buildModeCSS(d, generateSpaceScale(spaceBaseUnit)) + buildRegionCSS(sys.regions) + buildFontCSS(d);
 }
-
-// Tailwind config（theme.extend 片段，colors/spacing/radius/shadow/渐变一次导出）
-function buildTailwindConfig(tokens) {
-  const colorGroups = { accent: {}, bg: {}, text: {}, surface: {}, border: {}, success: {}, warning: {}, error: {}, info: {} };
-  tokens.forEach(t => {
-    const m = /^--color-([a-z]+)-(.*)$/.exec(t.name);
-    if (!m || !t.light || t.light.charAt(0) !== '#') return;
-    const group = m[1];
-    const name = m[2] || 'DEFAULT';
-    if (!colorGroups[group]) colorGroups[group] = {};
-    colorGroups[group][name] = t.light;
-  });
-
-  const accentBase = colorGroups.accent.base || '#2563eb';
-  const accent2 = colorGroups.accent['2'] || accentBase;
-
-  const shadowRgba = (token) => {
-    const hex = tokens.find(t => t.name === token);
-    if (!hex || !hex.light || hex.light.charAt(0) !== '#') return '0,0,0';
-    const rgb = hexToRgb(hex.light);
-    return rgb ? rgb.r + ',' + rgb.g + ',' + rgb.b : '0,0,0';
-  };
-
-  const lines = [];
-  lines.push('/** @type {import(\'tailwindcss\').Config} */');
-  lines.push('module.exports = {');
-  lines.push('  theme: {');
-  lines.push('    extend: {');
-  lines.push('      colors: {');
-  Object.keys(colorGroups).forEach(group => {
-    const keys = Object.keys(colorGroups[group]);
-    if (!keys.length) return;
-    lines.push('        ' + group + ': {');
-    keys.forEach(key => {
-      lines.push('          ' + (key === 'DEFAULT' ? 'DEFAULT' : JSON.stringify(key)) + ': \'' + colorGroups[group][key] + '\',');
-    });
-    lines.push('        },');
-  });
-  lines.push('      },');
-  lines.push('      borderRadius: {');
-  ['sm', 'md', 'lg'].forEach(k => {
-    const t = tokens.find(t => t.name === '--radius-' + k);
-    if (t) lines.push('        ' + k + ': \'' + t.light + '\',');
-  });
-  lines.push('      },');
-  lines.push('      boxShadow: {');
-  ['sm', 'md', 'lg'].forEach(k => {
-    const t = tokens.find(t => t.name === '--shadow-' + k);
-    if (t) lines.push('        ' + k + ': \'' + t.light.replace(/var\(--shadow-color\)/g, 'rgba(' + shadowRgba('--color-text-emphasis') + ',0.08)') + '\',');
-  });
-  lines.push('      },');
-  lines.push('      backgroundImage: {');
-  lines.push('        brand: \'linear-gradient(135deg, ' + accentBase + ', ' + accent2 + ')\',');
-  lines.push('      },');
-  lines.push('    },');
-  lines.push('  },');
-  lines.push('};');
-  return lines.join('\n');
-}
-
-// W3C Design Tokens JSON（颜色按组嵌套 + 双主题 light/dark，间距/圆角/阴影为 dimension/string）
-function buildJSONTokens(tokens) {
-  const out = { color: {}, dimension: {}, string: {} };
-  tokens.forEach(t => {
-    const key = t.name.replace(/^--color-/, '').replace(/^--space-/, '').replace(/^--radius-/, 'radius.').replace(/^--shadow-/, 'shadow.').replace(/^--gradient-/, 'gradient.').replace(/^--/, '');
-    const isColor = t.light && t.light.charAt(0) === '#';
-    if (isColor) {
-      // accent-base → color.accent.base；accent-on-accent → color.accent['on-accent']
-      const parts = key.split('-');
-      const group = parts[0];
-      const name = parts.slice(1).join('-') || 'DEFAULT';
-      if (!out.color[group]) out.color[group] = {};
-      out.color[group][name] = { light: t.light, dark: t.dark, type: 'color' };
-    } else if (/^--radius-|^--shadow-|^--gradient-/.test(t.name) || t.light.startsWith('linear-gradient')) {
-      out.string[key] = { light: t.light, dark: t.dark, type: 'string' };
-    } else if (t.light && t.light.indexOf('rem') !== -1) {
-      out.dimension[key] = { value: t.light, type: 'dimension' };
-    } else {
-      out.string[key] = { light: t.light, dark: t.dark, type: 'string' };
-    }
-  });
-  return JSON.stringify(out, null, 2);
-}
-
-// ── CSS 变量导出 ────────────────────────────────────
 
 function buildCSSExport(sys, tokens) {
-  const lightHeaders = {
-    accent: '强调色（含渐变搭档）',
-    neutral: '中性色 (品牌色温贯穿)',
-    state: '交互态',
-    secondary: '辅助色 (同源弱色度)',
-    functional: '功能色',
-    elevation: '阴影与层级',
-    radius: '圆角',
-    typography: '排版（字号 / 行高 / 字重）',
-    'space-scale': '间距系统 (基于 ' + spaceBaseUnit + 'px 网格)',
-    'space-semantic': '间距语义 Token'
-  };
-  const darkHeaders = {
-    accent: '强调色（暗色：降饱和防光晕）',
-    neutral: '中性色（暗色：深度=亮度）',
-    state: '交互态（暗色）',
-    secondary: '辅助色（暗色：深底 + 低饱和）',
-    functional: '功能色（暗色）',
-    elevation: '阴影与层级（暗色：阴影加深）',
-    radius: '圆角',
-    typography: '排版（不随主题变化）'
-  };
-  const groupOrder = ['accent', 'neutral', 'state', 'secondary', 'functional', 'elevation', 'radius', 'typography', 'space-scale', 'space-semantic'];
-
-  function block(headers, isLight) {
-    const lines = [];
-    groupOrder.forEach(g => {
-      const items = tokens.filter(t => t.group === g);
-      if (!items.length || !headers[g]) return;
-      const width = Math.max(...items.map(t => t.name.length)) + 2;
-      lines.push('  /* —— ' + headers[g] + ' —— */');
-      items.forEach(t => {
-        const comment = isLight ? '   /* ' + (t.group === 'space-scale' ? t.pxVal + 'px' : t.usage) + ' */' : '';
-        lines.push('  ' + t.name.padEnd(width) + ': ' + (isLight ? t.light : t.dark) + ';' + comment);
-      });
-      lines.push('');
-    });
-    return lines;
-  }
-
-  const lines = [
-    '/* ═══════════════════════════════════════════',
-    '   Color Engine — 自动生成的 CSS 变量',
-    '   复制到你的 :root 和 [data-theme="dark"] 中使用',
-    '   ═══════════════════════════════════════════ */',
-    '',
-    ':root {',
-    ...block(lightHeaders, true),
-    '}',
-    '',
-    '[data-theme="dark"] {',
-    ...block(darkHeaders, false),
-    '}',
-  ];
-
+  const lines = ['/* Color Engine：共享品牌、双主题、四种页面用途。 */', ':root {'];
+  TOKEN_GROUP_ORDER.forEach(group => {
+    const items = tokens.filter(t => t.group === group);
+    if (!items.length) return;
+    lines.push('  /* ' + TOKEN_GROUP_LABELS[group] + ' */');
+    items.forEach(t => lines.push('  ' + t.name + ': ' + t.light + '; /* ' + t.usage + ' */'));
+  });
+  lines.push('}', '[data-theme="dark"] {', tokenDeclarations(tokens, 'dark'), '}',
+    buildModeCSS(sys.design, generateSpaceScale(spaceBaseUnit)), buildRegionCSS(sys.regions), buildFontCSS(sys.design));
   return lines.join('\n');
 }
 
-// ── Token 对照表 ────────────────────────────────────
+// Tailwind 3.x theme.extend；主题和用途选择器由配套 CSS 提供。
+function buildTailwindConfig(tokens, sys) {
+  const colors = {}, spacing = {}, borderRadius = {}, fontSize = {}, boxShadow = {};
+  tokens.forEach(t => {
+    if (t.name.startsWith('--color-')) colors[t.name.slice(8)] = 'var(' + t.name + ')';
+    else if (t.name.startsWith('--region-')) colors[t.name.slice(2)] = 'var(' + t.name + ')';
+    else if (t.name.startsWith('--space-')) spacing[t.name.slice(8)] = 'var(' + t.name + ')';
+    else if (t.name.startsWith('--radius-')) borderRadius[t.name.slice(9)] = 'var(' + t.name + ')';
+    else if (/^--type-.*-size$/.test(t.name)) fontSize[t.name.slice(7, -5)] = 'var(' + t.name + ')';
+    else if (t.name.startsWith('--shadow-') && t.name !== '--shadow-color') boxShadow[t.name.slice(9)] = 'var(' + t.name + ')';
+  });
+  return '/* Tailwind 3.x：同时引入“CSS 变量”导出；data-theme 与 data-ce-mode 由该 CSS 实现。 */\n' +
+    'module.exports = ' + JSON.stringify({ theme: { extend: { colors, spacing, borderRadius, fontSize, boxShadow } } }, null, 2) + ';';
+}
 
+// 项目交换格式：显式携带主题、用途与品牌配置，不伪装为只有颜色的标准 DTCG 文件。
+function buildJSONTokens(tokens, sys) {
+  sys = exportSystem(sys);
+  const byName = Object.fromEntries(tokens.map(t => [t.name, { light: t.light, dark: t.dark === '—' ? t.light : t.dark, group: t.group, description: t.usage }]));
+  const regionSets = sys.regions ? {
+    plan: sys.regions.plan,
+    area: sys.regions.areaNote,
+    sets: Object.fromEntries(['light', 'dark'].map(theme => [theme, Object.fromEntries(
+      Object.entries(sys.regions.themes[theme]).map(([kind, set]) => [kind, {
+        bg: set.bg.hex, text: set.text.hex, textSecondary: set.textSecondary.hex, border: set.border.hex,
+        surface: set.surface.hex, action: set.action.hex, actionText: set.actionText.hex, focus: set.focus.hex,
+        functional: Object.fromEntries(Object.entries(set.functional).map(([k, v]) => [k, v.hex]))
+      }])
+    )]))
+  } : null;
+  const fonts = {
+    traits: (STYLE_FONTS[sys.design.style] || STYLE_FONTS.spectrum).traits,
+    stacks: fontStacks(sys.design.style),
+    roles: Object.fromEntries(Object.entries(TYPE_ROLES).map(([k, r]) => [k, { label: r.label, font: r.font, weight: r.weight, size: r.size, leading: r.leading, tracking: r.tracking, measure: r.measure, wrap: r.wrap }])),
+    optional: OPTIONAL_WEBFONTS
+  };
+  return JSON.stringify({ format: 'color-engine-design-context', version: 1, design: sys.design, regions: regionSets, fonts: fonts,
+    modes: Object.fromEntries(Object.keys(DESIGN_MODES).map(mode => {
+      const profile = resolveDesignProfile({ ...sys.design, mode, strategyExplicit: sys.design.strategySource === 'user' });
+      return [mode, { profile, tokens: modeTokenValues(profile, generateSpaceScale(spaceBaseUnit)) }];
+    })), tokens: byName }, null, 2);
+}

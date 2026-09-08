@@ -6,6 +6,7 @@
 let currentPreviewTheme = 'light';
 
 function setPreviewTheme(theme, btn) {
+  if (theme !== 'light' && theme !== 'dark') return;
   currentPreviewTheme = theme;
   const card = document.getElementById('comp-preview-card');
   if (card) card.setAttribute('data-theme', theme);
@@ -16,6 +17,10 @@ function setPreviewTheme(theme, btn) {
   document.querySelectorAll('#theme-toggle .theme-toggle-btn, #fs-theme-toggle .theme-toggle-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.theme === theme);
   });
+  if (window._lastSystem) {
+    window._lastSystem.design.theme = theme;
+    renderExport(window._lastSystem, window._lastTokens);
+  }
 }
 
 // ── 全屏预览：克隆当前示例到固定覆盖层，占满整个视口 ──
@@ -130,6 +135,7 @@ function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       groups,
       strategy: currentStrategy,
+      strategyExplicit,
       baseUnit: spaceBaseUnit,
       demoType: currentDemoType,
       demoStyle: currentDemoStyle
@@ -149,7 +155,10 @@ function restoreState() {
     container.innerHTML = '';
     s.groups.forEach((g, i) => container.appendChild(createColorGroup(i, g.hex, g.weight)));
 
-    if (['restrained', 'committed', 'full-palette', 'drenched'].indexOf(s.strategy) !== -1) currentStrategy = s.strategy;
+    if (['restrained', 'committed', 'full-palette', 'drenched'].indexOf(s.strategy) !== -1) {
+      currentStrategy = s.strategy;
+      strategyExplicit = s.strategyExplicit !== undefined ? s.strategyExplicit === true : true;
+    }
     if (s.baseUnit === 4 || s.baseUnit === 8) spaceBaseUnit = s.baseUnit;
     if (s.demoType === 'landing' || s.demoType === 'app') currentDemoType = s.demoType;
     if (['spectrum', 'standard', 'soft', 'glass', 'editorial'].indexOf(s.demoStyle) !== -1) currentDemoStyle = s.demoStyle;
@@ -162,7 +171,7 @@ function applyToggleState() {
   const setActive = (selector, val) => {
     document.querySelectorAll(selector).forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
   };
-  setActive('#strategy-toggle .theme-toggle-btn', currentStrategy);
+  setActive('#strategy-toggle .theme-toggle-btn', resolveDesignProfile(currentDesignOptions()).strategy);
   setActive('#base-unit-toggle .theme-toggle-btn', spaceBaseUnit);
   setActive('#demo-type-toggle .theme-toggle-btn', currentDemoType);
   setActive('#demo-style-toggle .theme-toggle-btn', currentDemoStyle);
@@ -368,12 +377,10 @@ var _tweakDirty = false;
 function updateTweakContext() {
   const el = document.getElementById('tweak-context');
   if (!el) return;
-  const names = { restrained: '克制', committed: '投入', 'full-palette': '全色板', drenched: '浸染' };
-  const factors = { restrained: 0.5, committed: 1.0, 'full-palette': 1.5, drenched: 2.0 };
-  const name = names[currentStrategy] || currentStrategy;
-  const f = factors[currentStrategy] || 1.0;
+  const profile = resolveDesignProfile(currentDesignOptions());
+  const strategy = DESIGN_STRATEGIES[profile.strategy];
   const unit = spaceBaseUnit === 8 ? '8px 标准' : '4px 精细';
-  el.textContent = '策略 ' + name + ' ×' + f + ' · 基准 ' + unit + ' · 强调色归滑块';
+  el.textContent = profile.surface.name + ' · ' + strategy.name + '：' + strategy.description + ' · ' + unit;
 }
 
 function syncTweakSliders(oklch) {
@@ -517,4 +524,3 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.matches('.hex-input, .weight-input')) saveState();
   });
 });
-

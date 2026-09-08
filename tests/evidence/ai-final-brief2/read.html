@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>把一次改版讲清楚：从问题到上线的完整记录 — 青冈工作室</title>
+<meta name="description" content="青冈工作室的项目复盘：一次内部工具改版从问题发现、方案取舍到上线数据的完整记录。">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="ce-surface" data-ce-mode="read">
+<a class="ce-skip" href="#main">跳到正文</a>
+
+<header class="ce-nav">
+  <div class="ce-nav-inner">
+    <a class="ce-brand" href="works.html">青冈</a>
+    <nav class="ce-nav-links" aria-label="站内导航">
+      <a class="ce-nav-link is-current" href="read.html" aria-current="page">阅读</a>
+      <a class="ce-nav-link" href="works.html">作品</a>
+    </nav>
+    <button class="ce-theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="切换到深色模式">
+      <span data-theme-label>深色</span>
+    </button>
+  </div>
+  <div class="ce-progress" aria-hidden="true"><span class="ce-progress-bar" data-progress-bar></span></div>
+</header>
+
+<section class="ce-region-brand ce-masthead" aria-labelledby="article-title">
+  <div class="ce-masthead-inner">
+    <p class="ce-type-label ce-masthead-kicker">项目复盘</p>
+    <h1 class="ce-type-display ce-masthead-title" id="article-title">把一次改版讲清楚：从问题到上线的完整记录</h1>
+    <p class="ce-type-body ce-masthead-sub">青冈工作室 · 一次内部工具重做的完整记录：问题是怎么被发现的，方案是怎么被砍掉的，数据说明了什么，以及哪些事我们到现在也没想明白。</p>
+    <p class="ce-type-meta ce-masthead-meta">2025 年 3 月发布 · 全文约 1200 字 · 文中数据均为合成示例</p>
+  </div>
+</section>
+
+<div class="ce-read-layout">
+  <nav class="ce-toc" aria-labelledby="toc-title">
+    <p class="ce-type-label ce-toc-title" id="toc-title">目录</p>
+    <ol class="ce-toc-list">
+      <li><a class="ce-toc-link" href="#s1">一、问题从哪里开始</a></li>
+      <li><a class="ce-toc-link" href="#s2">二、三次取舍</a></li>
+      <li><a class="ce-toc-link" href="#s3">三、上线之后</a></li>
+    </ol>
+  </nav>
+
+  <main class="ce-prose" id="main" data-prose>
+    <p class="ce-type-body ce-lede">去年秋天，我们把一个用了四年的内部工具推倒重做。这件事听起来平常，但它几乎踩遍了团队协作里能踩的坑：需求被反复解释、方案被推翻、排期被压缩，上线时还有一半人不知道改了什么。这篇文章把整个过程摊开讲——问题是怎么被发现的，方案是怎么被砍掉的，数据说明了什么，以及哪些事我们到现在也没想明白。</p>
+
+    <h2 class="ce-type-section" id="s1" data-section>一、问题从哪里开始</h2>
+    <p class="ce-type-body">改版的起点不是设计稿，而是一份被搁置了三个月的反馈表。表格里有 47 条记录，最早的一条写于四年前，最后一条下面只有一句「还是老样子」。我们把它打印出来贴在墙上，逐条读了一遍，发现真正让人停下来抱怨的其实只有三类：找不到入口、看不懂状态、不敢点确认。</p>
+    <p class="ce-type-body">为了确认这三类问题不是我们自己的想象，我们花了两个星期只做一件事——看用户怎么用旧版本。不访谈，不提问，只是坐在旁边看，记录他们每一次犹豫、回退和重复点击。二十场观察之后，三个问题被反复验证，甚至比反馈表里写的更具体：入口不在他们以为的地方，状态提示用的是内部术语，确认按钮的位置和危险操作挨得太近。</p>
+    <p class="ce-type-body">这一步没有产出任何设计稿，但它决定了后面所有的取舍。我们后来常跟客户说，改版最贵的成本不是画图，而是在错误的假设上画了三个月图。</p>
+
+    <blockquote class="ce-quote">
+      <p>「不要问用户想要什么，去看他们绕过了什么。」</p>
+      <cite class="ce-type-meta ce-quote-source">—— 内部评审会记录</cite>
+    </blockquote>
+
+    <h2 class="ce-type-section" id="s2" data-section>二、三次取舍</h2>
+    <p class="ce-type-body">第一版方案几乎被完全推翻。我们最初想保留旧版的导航结构，只做视觉升级，理由是迁移成本低。但观察记录里，三分之二的人第一步就走错了地方。于是我们砍掉了整个导航，改成按任务分组的三个入口，代价是用户需要重新学习——这个代价我们犹豫了很久，最后接受了。</p>
+    <p class="ce-type-body">第二次取舍关于信息密度。业务方希望一屏看到尽可能多的字段，我们则希望重点只留一个。争执不下的时候，我们把两种方案做成可点击的原型，各找了十个人试用。结果是：字段多的那版，任务完成时间反而更长。原因很简单，人在信息里找东西的速度，永远赶不上界面把重点藏起来的代价。</p>
+    <p class="ce-type-body">第三次取舍关于上线节奏。原计划一次性替换旧版本，后来改成灰度发布，先给 10% 的用户。这个决定让上线时间推迟了两周，但它换来了一个可以回滚的缓冲区——事实证明这是整件事里最划算的一笔投入。</p>
+
+    <h2 class="ce-type-section" id="s3" data-section>三、上线之后</h2>
+    <p class="ce-type-body">上线第一个月的数据比预期好，但没有好到可以庆祝。首屏加载从 3.4 秒降到 1.8 秒，任务完成率<sup><a class="ce-fnref" href="#fn2" id="ref2">2</a></sup>从 61% 升到 84%，平均点击次数从 7.2 次降到 4.6 次。这些数字背后，是我们在两个月里砍掉的三十多个功能点<sup><a class="ce-fnref" href="#fn1" id="ref1">1</a></sup>。</p>
+
+    <figure class="ce-table-figure">
+      <div class="ce-table-scroll">
+        <table class="ce-table">
+          <caption class="ce-type-meta">表 1 · 改版前后关键指标对比（上线 30 天窗口，合成示例）</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="ce-type-label">指标</th>
+              <th scope="col" class="ce-type-label">改版前</th>
+              <th scope="col" class="ce-type-label">上线 30 天后</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="ce-type-body">首屏加载时间</th>
+              <td class="ce-type-data">3.4 秒</td>
+              <td class="ce-type-data">1.8 秒<span class="ce-delta">−47%</span></td>
+            </tr>
+            <tr>
+              <th scope="row" class="ce-type-body">任务完成率</th>
+              <td class="ce-type-data">61%</td>
+              <td class="ce-type-data">84%<span class="ce-delta">+23pp</span></td>
+            </tr>
+            <tr>
+              <th scope="row" class="ce-type-body">平均点击次数</th>
+              <td class="ce-type-data">7.2 次</td>
+              <td class="ce-type-data">4.6 次<span class="ce-delta">−36%</span></td>
+            </tr>
+            <tr>
+              <th scope="row" class="ce-type-body">周活跃用户</th>
+              <td class="ce-type-data">12,480</td>
+              <td class="ce-type-data">15,930<span class="ce-delta">+27.6%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </figure>
+
+    <p class="ce-type-body">数据之外，还有一件小事值得记录。上线两周后，我们收到一封邮件，一位用户说：「现在终于知道自己在哪一步了。」<sup><a class="ce-fnref" href="#fn4" id="ref4">4</a></sup>这句话没有出现在任何指标里，但它是这次改版里我们最想听到的反馈。</p>
+    <p class="ce-type-body">遗留问题也还在。灰度期间的对比样本偏小<sup><a class="ce-fnref" href="#fn3" id="ref3">3</a></sup>，长期留存还看不出趋势；旧版本的导出功能被暂时下线，少数重度用户仍在等待；还有两个入口的命名，我们到现在也没找到更好的说法。</p>
+
+    <section class="ce-footnotes" aria-labelledby="footnotes-title">
+      <h3 class="ce-type-section" id="footnotes-title">脚注</h3>
+      <ol class="ce-footnote-list">
+        <li class="ce-type-meta" id="fn1">本文所有数据均为合成示例，用于演示排版与阅读节奏，不代表任何真实业务表现。</li>
+        <li class="ce-type-meta" id="fn2">任务完成率按「进入流程并完成最后一步」的用户数计算，统计窗口为上线后 30 天。</li>
+        <li class="ce-type-meta" id="fn3">灰度期间的对比样本为全量的 10%，长期留存趋势需要更长窗口才能判断。</li>
+        <li class="ce-type-meta" id="fn4">引用内容摘自内部评审会记录，已做匿名化处理。</li>
+      </ol>
+    </section>
+  </main>
+</div>
+
+<footer class="ce-footer">
+  <div class="ce-footer-inner">
+    <div class="ce-footer-block">
+      <p class="ce-type-label">青冈工作室</p>
+      <p class="ce-type-meta">本页所有数字、时间与案例均为合成示例，用于演示排版与阅读节奏，不代表真实业务表现。</p>
+    </div>
+    <nav class="ce-footer-nav" aria-label="页脚导航">
+      <a class="ce-footer-link" href="read.html" aria-current="page">阅读页</a>
+      <a class="ce-footer-link" href="works.html">作品选辑</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

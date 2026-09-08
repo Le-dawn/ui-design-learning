@@ -3,13 +3,13 @@
    依赖：color-math.js（先加载）。纯函数域，不触碰 DOM。
    ============================================================ */
 
-function getStrategyFactor() {
+function getStrategyFactor(strategy) {
   var map = { restrained: 0.5, committed: 1.0, 'full-palette': 1.5, drenched: 2.0 };
-  return map[currentStrategy] || 1.0;
+  return map[strategy || resolveDesignProfile(currentDesignOptions()).strategy] || 1.0;
 }
-function getStrategySecondaryFactor() {
+function getStrategySecondaryFactor(strategy) {
   var map = { restrained: 0.6, committed: 1.0, 'full-palette': 1.4, drenched: 1.8 };
-  return map[currentStrategy] || 1.0;
+  return map[strategy || resolveDesignProfile(currentDesignOptions()).strategy] || 1.0;
 }
 
 // 存储上次生成的强调色 OKLCH 供实时调色使用
@@ -282,7 +282,7 @@ function generateAccentScaleDark(accentOklch) {
 
 // ── 中性色阶推导（亮色模式 - 品牌色温贯穿全阶，文字带极淡色温）───
 
-function generateNeutralsLight(accentH) {
+function generateNeutralsLight(accentH, strategy) {
   const brandHue = accentH;
   const label = isWarmHue(accentH) ? '暖灰系 (Warm Gray)' : '冷灰系 (Cool Gray)';
 
@@ -298,7 +298,7 @@ function generateNeutralsLight(accentH) {
   ];
 
   // 背景区色温峰值随策略缩放：committed ≈0.020（肉眼可辨的品牌色调），克制 ×0.5 自然变淡，drenched 封顶防过头
-  const cPeak = clamp(0.020 * getStrategyFactor(), 0, 0.028);
+  const cPeak = clamp(0.020 * getStrategyFactor(strategy), 0, 0.028);
   // 文字区保留极淡品牌色温（≈Radix sand/olive 风格），整页色温同频，肉眼几乎无感
   const textC = 0.008;
   // 表面四层（画布/卡片/悬停/边框）的 C 占比：卡片纯白带极淡色温 → 边框最浓
@@ -321,9 +321,9 @@ function generateNeutralsLight(accentH) {
 
 // ── 中性色阶推导（暗色模式 - 品牌色温贯穿全阶） ──
 
-function generateNeutralsDark(accentH) {
+function generateNeutralsDark(accentH, strategy) {
   const brandHue = accentH;
-  const cPeak = clamp(0.014 * getStrategyFactor(), 0, 0.022);
+  const cPeak = clamp(0.014 * getStrategyFactor(strategy), 0, 0.022);
   const textC = 0.008;
 
   const levels = [
@@ -355,9 +355,9 @@ function generateNeutralsDark(accentH) {
 
 // ── 辅助色（同源辅助） ──────────────────────────────
 
-function generateSecondaryLight(accentOklch) {
+function generateSecondaryLight(accentOklch, strategy) {
   const { L, C, H } = accentOklch;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'secondary-50',  l: 0.92, c: C * 0.20 * sf, usage: '大面积辅助背景' },
     { name: 'secondary-100', l: 0.82, c: C * 0.35 * sf, usage: '卡片头部 / 信息条' },
@@ -373,9 +373,9 @@ function generateSecondaryLight(accentOklch) {
   });
 }
 
-function generateSecondaryDark(accentOklch) {
+function generateSecondaryDark(accentOklch, strategy) {
   const { L, C, H } = accentOklch;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'secondary-50',  l: 0.18, c: C * 0.18 * sf, usage: '暗色辅助背景' },
     { name: 'secondary-100', l: 0.25, c: C * 0.25 * sf, usage: '暗色卡片头部' },
@@ -393,10 +393,10 @@ function generateSecondaryDark(accentOklch) {
 
 // ── 邻近色辅助（旋转 Hue） ───────────────────────────
 
-function generateAdjacentLight(accentOklch) {
+function generateAdjacentLight(accentOklch, strategy) {
   const { L, C, H } = accentOklch;
   const adjH = (H + 30) % 360;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'adjacent-50',  l: 0.92, c: C * 0.20 * sf, usage: '邻近辅助背景' },
     { name: 'adjacent-100', l: 0.80, c: C * 0.35 * sf, usage: '邻近卡片头部' },
@@ -412,10 +412,10 @@ function generateAdjacentLight(accentOklch) {
   });
 }
 
-function generateAdjacentDark(accentOklch) {
+function generateAdjacentDark(accentOklch, strategy) {
   const { L, C, H } = accentOklch;
   const adjH = (H + 30) % 360;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'adjacent-50',  l: 0.18, c: C * 0.16 * sf, usage: '暗色邻近背景' },
     { name: 'adjacent-100', l: 0.25, c: C * 0.22 * sf, usage: '暗色邻近头部' },
@@ -433,11 +433,11 @@ function generateAdjacentDark(accentOklch) {
 
 // ── 冷暖对比辅助（温度反差路线） ────────────────────
 
-function generateWarmContrastLight(accentOklch) {
+function generateWarmContrastLight(accentOklch, strategy) {
   const { C } = accentOklch;
   const isAccentCool = !isWarmHue(accentOklch.H);
   const contrastH = isAccentCool ? 45 : 225;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'contrast-50',  l: 0.92, c: C * 0.20 * sf, usage: '冷暖对比辅助背景' },
     { name: 'contrast-100', l: 0.80, c: C * 0.32 * sf, usage: '冷暖对比卡片头部' },
@@ -453,11 +453,11 @@ function generateWarmContrastLight(accentOklch) {
   });
 }
 
-function generateWarmContrastDark(accentOklch) {
+function generateWarmContrastDark(accentOklch, strategy) {
   const { C } = accentOklch;
   const isAccentCool = !isWarmHue(accentOklch.H);
   const contrastH = isAccentCool ? 45 : 225;
-  const sf = getStrategySecondaryFactor();
+  const sf = getStrategySecondaryFactor(strategy);
   return [
     { name: 'contrast-50',  l: 0.18, c: C * 0.14 * sf, usage: '暗色对比辅助背景' },
     { name: 'contrast-100', l: 0.25, c: C * 0.20 * sf, usage: '暗色对比卡片头部' },
@@ -585,6 +585,188 @@ function verifyContrast(neutralsLight, neutralsDark) {
     const pass = p.criteria === 'either' ? (wcagPass || apcaPass) : (wcagPass && apcaPass);
     return { ...p, mode: p.light ? 'light' : 'dark', text, bg, apca, wcag, wcagPass, apcaPass, pass };
   });
+}
+
+/* ── 区域配色：策略作用于整块区域 ─────────────────────
+   策略决定"哪些区域有颜色、占多大面积、前景与背景是什么关系"，
+   不再只放大色阶的 C 倍数。所有前景色都在最终 Hex（含 sRGB 色域裁剪）
+   上验证对比度，因此高色度、亮色、接近功能色的品牌色也有实测结论。
+   区域角色：brand（品牌主区域）/ auxiliary（辅助内容区域）/ canvas（染色画布）。
+   ─────────────────────────────────────────────────── */
+
+// l = [亮色模式 L, 暗色模式 L]；cm = 品牌色 C 的倍数；c = 绝对 C；surface = 内层表面明度偏移
+const REGION_SPECS = {
+  restrained: {
+    brand: { l: [0.968, 0.225], c: 0.012, surface: 0.022, action: 'accent' }
+  },
+  committed: {
+    brand: { l: [0.520, 0.330], cm: 0.95, surface: 0.070 }
+  },
+  'full-palette': {
+    brand: { l: [0.520, 0.330], cm: 0.95, surface: 0.070 },
+    auxiliary: { l: [0.902, 0.212], cm: 0.30, hueShift: 32, surface: 0.040 }
+  },
+  drenched: {
+    canvas: { l: [0.898, 0.196], cm: 0.30 },
+    brand: { l: [0.430, 0.280], cm: 0.85, surface: 0.060 }
+  }
+};
+
+const REGION_PLANS = {
+  restrained: { canvas: false, brand: 'subtle', auxiliary: false, note: '中性画布；颜色集中在主操作与状态，不铺满区块。' },
+  committed: { canvas: false, brand: 'large', auxiliary: false, note: '一个完整品牌区域承担视觉重点；其余区域保持中性。' },
+  'full-palette': { canvas: false, brand: 'large', auxiliary: true, note: '品牌区域、辅助内容区域与行动色各有稳定角色。' },
+  drenched: { canvas: true, brand: 'large', auxiliary: false, note: '画布本身染色，区域表面为同色系深浅。' }
+};
+
+// 区域 token 的角色顺序：名称、中文用途
+const REGION_TOKEN_ROLES = [
+  ['bg', '区域背景'],
+  ['text', '区域正文'],
+  ['text-secondary', '区域次要文字'],
+  ['border', '区域边框'],
+  ['surface', '区域内层表面'],
+  ['action', '区域内主行动'],
+  ['action-text', '区域内行动文字'],
+  ['focus', '区域内焦点环']
+];
+
+function regionOklch(L, C, H) {
+  return { L: clamp(L, 0, 1), C: Math.max(0, C), H: ((H % 360) + 360) % 360 };
+}
+function regionHex(o) { return oklchToHex(o.L, o.C, o.H); }
+function regionRatio(a, b) { return wcagContrast(regionHex(a), regionHex(b)); }
+
+// 沿明度轴把前景推离背景，直到"最终 Hex"上的对比度达标
+function pushRegionContrast(fg, bg, min) {
+  const dir = fg.L >= bg.L ? 1 : -1;
+  let cand = regionOklch(fg.L, fg.C, fg.H);
+  let ratio = regionRatio(cand, bg);
+  for (let i = 0; i < 80 && ratio < min; i++) {
+    cand = regionOklch(cand.L + dir * 0.012, cand.C * 0.99, cand.H);
+    ratio = regionRatio(cand, bg);
+    if (cand.L <= 0.004 || cand.L >= 0.996) break;
+  }
+  return { oklch: cand, hex: regionHex(cand), ratio: ratio, pass: ratio >= min };
+}
+
+// 区域内前景：先试同色系两极，取对比更高的一侧，必要时继续推到达标
+function regionForeground(bg, hue, chroma, min) {
+  const tint = Math.min(chroma * 0.18, 0.022);
+  const light = pushRegionContrast(regionOklch(0.985, tint, hue), bg, min);
+  const dark = pushRegionContrast(regionOklch(0.145, tint, hue), bg, min);
+  return light.ratio >= dark.ratio ? light : dark;
+}
+
+// 单个区域配色：背景、前景、边框、内层表面、区域内行动与功能色
+function buildRegionSet(kind, spec, accent, theme) {
+  const isLight = theme === 'light';
+  const idx = isLight ? 0 : 1;
+  const hue = ((accent.H + (spec.hueShift || 0)) % 360 + 360) % 360;
+  const chroma = (spec.c != null ? spec.c : accent.C * spec.cm) * (isLight ? 1 : 0.82);
+
+  const bg = regionOklch(spec.l[idx], chroma, hue);
+  const text = regionForeground(bg, hue, chroma, 4.5);
+
+  // 次要文字从区域前景与背景的关系推导：向背景靠一档，仍要求 WCAG≥4.5 或 APCA≥60
+  const towardsBg = text.oklch.L >= bg.L ? -0.16 : 0.16;
+  const secStart = regionOklch(text.oklch.L + towardsBg, Math.min(chroma * 0.5, 0.03), hue);
+  const secWcag = regionRatio(secStart, bg);
+  const secApca = Math.abs(calculateApca(regionHex(secStart), regionHex(bg)));
+  const secondary = (secWcag >= 4.5 || secApca >= 60)
+    ? { oklch: secStart, hex: regionHex(secStart), ratio: secWcag, apca: secApca, pass: true, tier: secWcag >= 4.5 ? 'wcag' : 'apca' }
+    : (() => { const p = pushRegionContrast(secStart, bg, 4.5); return { ...p, apca: Math.abs(calculateApca(p.hex, regionHex(bg))), tier: 'pushed' }; })();
+
+  const borderStart = regionOklch(bg.L + (text.oklch.L >= bg.L ? 0.14 : -0.14), Math.min(chroma * 0.6, 0.04), hue);
+  const border = pushRegionContrast(borderStart, bg, 1.6);
+
+  const surfaceOffset = spec.surface != null ? spec.surface : 0.035;
+  const surface = regionOklch(clamp(bg.L + surfaceOffset, 0.02, 0.996), chroma * 0.92, hue);
+
+  // 区域内主行动：品牌区域优先用与背景分离的表面色，克制策略保留品牌强调色
+  const actionTint = Math.min(chroma * 0.15, 0.02);
+  const actionCandidates = spec.action === 'accent'
+    ? [{ source: '品牌强调色', o: regionOklch(accent.L, accent.C, accent.H) }, { source: '区域内深色表面', o: regionOklch(0.150, actionTint, hue) }]
+    : (bg.L < 0.62
+      ? [{ source: '区域内浅色表面', o: regionOklch(0.985, actionTint, hue) }, { source: '区域内深色表面', o: regionOklch(0.150, actionTint, hue) }, { source: '品牌强调色', o: regionOklch(accent.L, accent.C, accent.H) }]
+      : [{ source: '区域内深色表面', o: regionOklch(0.150, actionTint, hue) }, { source: '区域内浅色表面', o: regionOklch(0.985, actionTint, hue) }, { source: '品牌强调色', o: regionOklch(accent.L, accent.C, accent.H) }]);
+  let action = null;
+  for (const c of actionCandidates) {
+    const r = pushRegionContrast(c.o, bg, 3.0);
+    if (r.pass) { action = { ...r, source: c.source }; break; }
+  }
+  if (!action) { const r = pushRegionContrast(regionOklch(bg.L > 0.5 ? 0.05 : 0.95, 0, hue), bg, 3.0); action = { ...r, source: '区域外极值表面' }; }
+  const actionText = regionForeground(action.oklch, hue, Math.min(chroma * 0.4, 0.03), 4.5);
+
+  // 功能色在染色区域中仍要能区分：保留色相语义，只在区域底色上调整明度
+  const functional = {};
+  generateFunctionalColors(hue).forEach(f => {
+    const base = isLight ? f.base : f.dark.base;
+    const pushed = pushRegionContrast(base.oklch, bg, 3.0);
+    functional[f.name] = { hex: pushed.hex, ratio: pushed.ratio, pass: pushed.pass };
+  });
+
+  return {
+    kind: kind, theme: theme, hue: hue,
+    bg: { oklch: bg, hex: regionHex(bg) },
+    text: text,
+    textSecondary: secondary,
+    border: border,
+    surface: { oklch: surface, hex: regionHex(surface) },
+    action: action,
+    actionText: actionText,
+    focus: { hex: action.hex, ratio: action.ratio, pass: action.pass },
+    functional: functional
+  };
+}
+
+function generateRegionColors(accentOklch, strategy) {
+  const key = REGION_SPECS[strategy] ? strategy : 'committed';
+  const specs = REGION_SPECS[key];
+  const themes = {};
+  ['light', 'dark'].forEach(theme => {
+    themes[theme] = {};
+    Object.keys(specs).forEach(kind => {
+      themes[theme][kind] = buildRegionSet(kind, specs[kind], accentOklch, theme);
+    });
+  });
+  return { strategy: key, plan: REGION_PLANS[key], areaNote: REGION_PLANS[key].note, themes: themes };
+}
+
+// 区域 token：普通区域继续用基础 tokens，进入区域后由局部映射切换语义
+// 染色区域额外携带功能色，保证成功/警告/错误在彩色底上仍能区分
+function buildRegionTokens(regions) {
+  const tokens = [];
+  if (!regions) return tokens;
+  Object.keys(regions.themes.light).forEach(kind => {
+    REGION_TOKEN_ROLES.forEach(role => {
+      const key = role[0].replace(/-([a-z])/g, (m, c) => c.toUpperCase());
+      const light = regions.themes.light[kind][key];
+      const dark = regions.themes.dark[kind][key];
+      if (!light) return;
+      tokens.push({
+        name: '--region-' + kind + '-' + role[0],
+        light: light.hex,
+        dark: dark ? dark.hex : light.hex,
+        usage: light.source ? light.source : role[1],
+        group: 'region'
+      });
+    });
+    // 近中性表面沿用基础功能色；只有真正染色的区域才需要单独一档
+    if (regions.themes.light[kind].bg.oklch.C <= 0.03) return;
+    ['success', 'warning', 'error', 'info'].forEach(name => {
+      const light = regions.themes.light[kind].functional[name];
+      const dark = regions.themes.dark[kind].functional[name];
+      tokens.push({
+        name: '--region-' + kind + '-' + name,
+        light: light.hex,
+        dark: dark.hex,
+        usage: '区域内' + { success: '成功', warning: '警告', error: '错误', info: '信息' }[name] + '状态色',
+        group: 'region'
+      });
+    });
+  });
+  return tokens;
 }
 
 // ── 多色权重评分 ────────────────────────────────────

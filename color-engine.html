@@ -481,6 +481,7 @@ details[open] summary { margin-bottom: 12px; }
             <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
           </div>
         </div>
+        <p id="preview-context" class="note" role="status" aria-live="polite"></p>
         <div id="component-demo">
           <!-- Dynamically filled -->
         </div>
@@ -532,15 +533,16 @@ details[open] summary { margin-bottom: 12px; }
 </div>
 
 <!-- 依赖顺序：数学 → 色阶推导 → 调度 → 间距 → 自检 → 渲染 → 示例 → 导出 → 交互 -->
-<script src="color-math.js"></script>
-<script src="color-engine-palette.js"></script>
-<script src="color-engine-core.js"></script>
-<script src="space-engine-core.js"></script>
-<script src="detector-engine.js"></script>
-<script src="color-engine-render.js"></script>
-<script src="color-engine-demo.js"></script>
-<script src="color-engine-export.js"></script>
-<script src="color-engine-interact.js"></script>
+<script src="color-math.js?v=20260908-1"></script>
+<script src="design-profiles.js?v=20260908-1"></script>
+<script src="color-engine-palette.js?v=20260908-1"></script>
+<script src="color-engine-core.js?v=20260908-1"></script>
+<script src="space-engine-core.js?v=20260908-1"></script>
+<script src="detector-engine.js?v=20260908-1"></script>
+<script src="color-engine-render.js?v=20260908-1"></script>
+<script src="color-engine-demo.js?v=20260908-1"></script>
+<script src="color-engine-export.js?v=20260908-1"></script>
+<script src="color-engine-interact.js?v=20260908-1"></script>
 <!-- End of Color Engine scripts -->
 
 </body>

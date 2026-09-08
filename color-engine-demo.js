@@ -82,6 +82,11 @@ function buildDemoCSS() {
     /* 棱镜五带：默认静态；进场时刻只属于光谱世界（见 spectrum 覆盖层） */
     .ce-band { opacity: 1; transform: none; }
 
+    /* ── 区域配色：策略决定哪些区块上色（.ce-region-* 的语义映射由 buildRegionCSS 生成）── */
+    .ce-hero.ce-region-brand, .ce-hero.ce-region-auxiliary { padding: var(--space-3xl) var(--space-2xl); border-radius: var(--ce-r-md); }
+    .ce-plate.ce-region-brand, .ce-plate.ce-region-auxiliary, .ce-split.ce-region-auxiliary { padding: var(--space-2xl); border-radius: var(--ce-r-md); border-top-color: transparent; }
+    .ce-metrics.ce-region-auxiliary { padding: var(--space-xl) var(--space-2xl); border-radius: var(--ce-r-md); }
+
     /* ── 观测排程数据板 ── */
     .ce-plate { border-top: var(--ce-line) solid var(--ce-border-c); padding-top: var(--space-2xl); }
     .ce-plate-no { display: none; font-family: var(--ce-mono); font-size: .6rem; letter-spacing: .18em; color: var(--color-text-secondary); margin-bottom: 10px; }
@@ -199,6 +204,11 @@ function buildDemoCSS() {
 // 每个风格 = 世界变量覆盖 + 专属规则。切换风格只换 CSS，不动结构、不动 token。
 
 function demoStyleCSS(style) {
+  // 字体角色由 STYLE_FONTS 解析，风格只换字体不换结构；用途规则可再覆盖展示字体
+  const fs = fontStacks(style);
+  const ff = STYLE_FONTS[style] || STYLE_FONTS.spectrum;
+  const fontRule = '      .ce-style-' + style + ' { --ce-display: ' + fs.display + '; --ce-body: ' + fs.body + '; --ce-mono: ' + fs.data +
+    '; --ce-display-weight: ' + ff.displayWeight + '; --ce-display-tracking: ' + ff.displayTracking + '; }\n';
   const css = {
     // ── 光谱：默认风格（无变量覆盖），仅签名魔法 ──
     // 签名魔法 1：行对焦 —— 仪器式聚焦反馈（悬停行时数据列依次点亮）
@@ -222,7 +232,7 @@ function demoStyleCSS(style) {
     `,
     // 暖糖：消费级亲切感 —— 大圆角、柔影、圆点状态、浅边框
     soft: `
-      .ce-style-soft { --ce-r-sm: 14px; --ce-r-md: 20px; --ce-line: 1px; --ce-dot-r: 50%; --ce-card-bg: var(--color-surface-raised); --ce-border-c: color-mix(in srgb, var(--color-border) 55%, transparent); --ce-shadow-btn: 0 1px 2px rgba(0,0,0,.06), 0 6px 18px color-mix(in srgb, var(--color-accent-base) 26%, transparent); --ce-shadow-inset: inset 0 2px 4px rgba(0,0,0,.08); --ce-display: "SF Pro Rounded", "Segoe UI Variable", "Segoe UI", -apple-system, "PingFang SC", sans-serif; }
+      .ce-style-soft { --ce-r-sm: 14px; --ce-r-md: 20px; --ce-line: 1px; --ce-dot-r: 50%; --ce-card-bg: var(--color-surface-raised); --ce-border-c: color-mix(in srgb, var(--color-border) 55%, transparent); --ce-shadow-btn: 0 1px 2px rgba(0,0,0,.06), 0 6px 18px color-mix(in srgb, var(--color-accent-base) 26%, transparent); --ce-shadow-inset: inset 0 2px 4px rgba(0,0,0,.08); }
       .ce-style-soft .ce-panel, .ce-app.ce-style-soft { box-shadow: 0 12px 32px -14px color-mix(in srgb, var(--color-text-emphasis) 22%, transparent); }
       .ce-style-soft .ce-hero-title { letter-spacing: -.01em; }
       .ce-style-soft .ce-logo-name { letter-spacing: .06em; }
@@ -241,7 +251,7 @@ function demoStyleCSS(style) {
     `,
     // 流光：AI / SaaS 科技感 —— 玻璃模糊、辉光按钮、渐变光斑
     glass: `
-      .ce-style-glass { --ce-r-sm: 10px; --ce-r-md: 16px; --ce-line: 1px; --ce-dot-r: 50%; --ce-card-bg: color-mix(in srgb, var(--color-bg-secondary) 76%, transparent); --ce-shadow-btn: 0 0 0 1px color-mix(in srgb, var(--color-accent-base) 20%, transparent), 0 8px 26px color-mix(in srgb, var(--color-accent-base) 42%, transparent); --ce-shadow-inset: inset 0 1px 2px rgba(0,0,0,.12); --ce-display: "Helvetica Neue", "Segoe UI Variable", "Segoe UI", -apple-system, "PingFang SC", sans-serif; }
+      .ce-style-glass { --ce-r-sm: 10px; --ce-r-md: 16px; --ce-line: 1px; --ce-dot-r: 50%; --ce-card-bg: color-mix(in srgb, var(--color-bg-secondary) 76%, transparent); --ce-shadow-btn: 0 0 0 1px color-mix(in srgb, var(--color-accent-base) 20%, transparent), 0 8px 26px color-mix(in srgb, var(--color-accent-base) 42%, transparent); --ce-shadow-inset: inset 0 1px 2px rgba(0,0,0,.12); }
       /* 玻璃必须糊到东西：app 壳铺渐变光景（accent-subtle + accent-2 双 radial），
          半透明面板 + blur 才有物可糊。sidebar 不透明、主区透明 → 玻璃只出现在内容区 */
       .ce-app.ce-style-glass { background:
@@ -271,7 +281,7 @@ function demoStyleCSS(style) {
     `,
     // 书卷：内容 / 品牌 —— 衬线标题、大留白、无阴影、强调克制
     editorial: `
-      .ce-style-editorial { --ce-r-sm: 2px; --ce-r-md: 4px; --ce-line: 1px; --ce-dot-r: 1px; --ce-display: "Songti SC", "Noto Serif SC", "STSong", "SimSun", Georgia, "Times New Roman", serif; --ce-mono: "Songti SC", "Noto Serif SC", "STSong", "SimSun", Georgia, "Times New Roman", serif; --ce-shadow-btn: none; --ce-shadow-inset: none; }
+      .ce-style-editorial { --ce-r-sm: 2px; --ce-r-md: 4px; --ce-line: 1px; --ce-dot-r: 1px; --ce-shadow-btn: none; --ce-shadow-inset: none; }
       .ce-landing.ce-style-editorial { gap: var(--space-7xl); }
       .ce-style-editorial .ce-hero-title { letter-spacing: 0; }
       .ce-style-editorial .ce-logo-name { font-family: var(--ce-display); letter-spacing: .04em; }
@@ -292,7 +302,6 @@ function demoStyleCSS(style) {
     standard: `
       .ce-style-standard {
         --ce-r-sm: 8px; --ce-r-md: 12px; --ce-line: 1px; --ce-dot-r: 50%;
-        --ce-display: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
         --ce-border-c: var(--color-border);
         --ce-card-bg: var(--color-bg-secondary);
         --ce-shadow-btn: 0 1px 2px rgba(0,0,0,.05), 0 4px 12px color-mix(in srgb, var(--color-accent-base) 22%, transparent);
@@ -316,77 +325,88 @@ function demoStyleCSS(style) {
       @media (prefers-reduced-motion: reduce) { .ce-style-standard .ce-hero { animation: none; } }
     `
   };
-  return css[style] || '';
+  return fontRule + (css[style] || '');
 }
 
 // ── 规则条：随风格切换的「设计约定」教学文本（与 STYLES.md 保持一致）──
 
-const RULES_BY_STYLE = {
-  spectrum: {
-    title: '光谱世界 · 纸面工业',
-    rules: [
-      ['01 强调是例外', '彩色只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），一屏 ≤ 3 处'],
-      ['02 数据即读数', '数据 / 编号 / 时间一律等宽 tabular；字重分级，别让同一字重从头走到尾'],
-      ['03 发丝线结构', '全部结构靠 1px 发丝边框与纸白分层；3px 倒角，禁用圆角胶囊'],
-      ['04 深度靠线不靠色', '偏移阴影 + 发丝线；无渐变、无光斑、无装饰彩虹'],
-      ['05 气质', '像天文台控制台——数据可信，界面退后']
-    ]
-  },
-  standard: {
-    title: '标准世界 · 现代 SaaS',
-    rules: [
-      ['01 强调是例外', '主按钮实色、链接、选中态、焦点环，一屏 ≤ 3 处'],
-      ['02 白卡浮浅底', '适中圆角（8–12px）+ 柔和双层阴影；1px 细边框'],
-      ['03 系统无衬线', '标题加粗 + 正文常规，数字 tabular；不引入特殊字体'],
-      ['04 交互克制', 'hover 轻微上浮 + 阴影加深，active 内凹，过渡 150ms'],
-      ['05 零装饰', '无网格、无印章、无光斑、无渐变文字；图标用统一描边 SVG']
-    ]
-  },
-  soft: {
-    title: '暖糖世界 · 消费级圆润',
-    rules: [
-      ['01 大圆角 + 柔影', '14–20px 圆角，多层柔和阴影（模糊 10–30px、低透明度）'],
-      ['02 圆润无衬线', '字距可放宽，少用等宽字体；状态点圆形'],
-      ['03 强调可活泼', '按钮、徽章、图标底都能用，但一屏仍不超过 3 处'],
-      ['04 弹性手感', 'hover 上浮 1px，按压下沉回弹（overshoot 曲线），过渡 150ms'],
-      ['05 气质', '亲切、安全、值得信任——像健康 / 教育类 App']
-    ]
-  },
-  glass: {
-    title: '流光世界 · 玻璃科技',
-    rules: [
-      ['01 玻璃面板', '半透明表面 + backdrop-filter blur 14–18px + 1px 半透明描边'],
-      ['02 光效有作者', 'CTA 辉光呼吸带偏移；光斑只在大区块顶部，发光不刺眼'],
-      ['03 标题收紧', '现代几何无衬线，标题字距略收紧'],
-      ['04 强调克制', '一屏 ≤ 3 处，光效是唯一持续动效'],
-      ['05 气质', 'AI 产品、未来感——玻璃要糊得到东西，否则删掉 blur']
-    ]
-  },
-  editorial: {
-    title: '书卷世界 · 编辑内容',
-    rules: [
-      ['01 衬线声音', '中文宋体 / 英文 Georgia；标题不收紧字距，正文行高 1.7'],
-      ['02 强调全场最多 1 处', '链接或 CTA 二选一，其余全部中性'],
-      ['03 大留白', '区块间距 ≥ 80px，标题与正文间 8–12px；宁可空，不可挤'],
-      ['04 几乎无阴影', '纯色底 + 1px 细线分隔；圆角 2–4px 或直角'],
-      ['05 气质', '杂志、出版社、编辑部——克制、慢、有分量']
-    ]
-  }
-};
-
 function updateRulesStrip(style) {
-  const conf = RULES_BY_STYLE[style] || RULES_BY_STYLE.spectrum;
+  const profile = resolveDesignProfile(currentDesignOptions());
   const titleEl = document.getElementById('rules-strip-title');
   const itemsEl = document.getElementById('rules-strip-items');
   if (!titleEl || !itemsEl) return;
-  titleEl.firstChild.nodeValue = conf.title + ' ';
-  itemsEl.innerHTML = conf.rules.map(r =>
-    '<div class="rules-strip-item"><b class="rs-k">' + r[0] + '</b>' + r[1] + '</div>'
-  ).join('');
+  titleEl.textContent = profile.identity.name + ' · ' + profile.surface.name;
+  const rules = [['品牌', profile.identity.character], ['表面', profile.identity.material],
+    ['布局', profile.surface.layout], ['密度', profile.surface.density], ['动效', profile.surface.motion]];
+  itemsEl.innerHTML = rules.map(r => '<div class="rules-strip-item"><b class="rs-k">' + r[0] + '</b>' + escapeHtml(r[1]) + '</div>').join('');
 }
 
-function renderComponents(tokens) {
+// ── 区域配色：策略决定哪些区域上色；区域类在局部重映射语义变量 ──
+// 普通区域继续用基础 tokens，进入区域后同一按钮、输入框、链接自动适配。
+
+function buildRegionCSS(regions) {
+  if (!regions) return '';
+  // canvas 是画布本身，保留品牌行动色；brand / auxiliary 连行动色一起局部映射
+  const withAction = { canvas: false, auxiliary: true, brand: true };
+  return ['canvas', 'auxiliary', 'brand'].filter(k => regions.themes.light[k]).map(kind => {
+    const p = '--region-' + kind + '-';
+    const v = [
+      '  --color-bg-primary: var(' + p + 'bg);',
+      '  --color-bg-secondary: var(' + p + 'surface);',
+      '  --color-bg-tertiary: var(' + p + 'surface);',
+      '  --color-surface-raised: var(' + p + 'surface);',
+      '  --ce-card-bg: var(' + p + 'surface);',
+      '  --color-text-primary: var(' + p + 'text);',
+      '  --color-text-emphasis: var(' + p + 'text);',
+      '  --color-text-secondary: var(' + p + 'text-secondary);',
+      '  --color-text-muted: var(' + p + 'text-secondary);',
+      '  --color-border: var(' + p + 'border);',
+      '  --ce-border-c: var(' + p + 'border);'
+    ];
+    if (withAction[kind]) {
+      v.push('  --color-accent-base: var(' + p + 'action);',
+        '  --color-accent-on-accent: var(' + p + 'action-text);',
+        '  --color-accent-hover: color-mix(in srgb, var(' + p + 'action) 86%, var(' + p + 'text));',
+        '  --color-accent-active: color-mix(in srgb, var(' + p + 'action) 72%, var(' + p + 'text));',
+        '  --color-accent-subtle: color-mix(in srgb, var(' + p + 'action) 16%, var(' + p + 'bg));',
+        '  --color-focus-ring: var(' + p + 'focus);');
+    }
+    // 染色区域里的功能色换成实测过的一档，避免语义色与区域底混在一起
+    if (regions.themes.light[kind].bg.oklch.C > 0.03) {
+      ['success', 'warning', 'error', 'info'].forEach(n => v.push('  --color-' + n + ': var(' + p + n + ');'));
+    }
+    return '.ce-region-' + kind + ' {\n' + v.join('\n') + '\n  background: var(' + p + 'bg);\n  color: var(' + p + 'text);\n}';
+  }).join('\n\n');
+}
+
+// 按策略把区域类挂到稳定的区域角色上；内容、数据和结构不随策略改变
+function applyRegionPlan(html, regions, mode, style) {
+  if (!regions) return html;
+  const plan = regions.plan;
+  let out = html;
+  const put = (find, cls) => { if (out.indexOf(find) >= 0) out = out.replace(find, cls); };
+  if (plan.canvas) out = out.replace(/class="ce-(landing|app)/, 'class="ce-region-canvas ce-$1');
+  if (mode === 'operate') {
+    put('class="ce-panel ce-panel-spectrum"', 'class="ce-panel ce-panel-spectrum ce-region-brand"');
+    if (plan.auxiliary) out = out.replace(/class="ce-panel"(?! ce-panel-spectrum)/, 'class="ce-panel ce-region-auxiliary"');
+  } else if (mode === 'read') {
+    // 阅读页面保持低干扰：不铺区域，只有章节引导可用品牌色
+  } else if (mode === 'experience') {
+    put('class="ce-surface ce-style-' + style + '"', 'class="ce-surface ce-style-' + style + ' ce-region-brand"');
+  } else if (plan.brand === 'large') {
+    put('class="ce-hero"', 'class="ce-hero ce-region-brand"');
+    if (plan.auxiliary) put('class="ce-plate"', 'class="ce-plate ce-region-auxiliary"');
+  } else {
+    put('class="ce-plate"', 'class="ce-plate ce-region-brand"');
+    if (plan.auxiliary) put('class="ce-split"', 'class="ce-split ce-region-auxiliary"');
+  }
+  return out;
+}
+
+function renderComponents(tokens, sys) {
   _lastDemoTokens = tokens;
+  const system = sys || window._lastSystem;
+  const design = system.design;
   const tokenStyle = document.getElementById('generated-tokens');
   const colorTokens = tokens.filter(t => t.light && String(t.light).startsWith('#'));
 
@@ -395,7 +415,7 @@ function renderComponents(tokens) {
   // 示例 CSS 引用 var(--space-*) 才能生效——只注入颜色会让所有间距塌成 0
   const cssVarsLight = tokens.map(t => `${t.name}: ${t.light};`).join('\n');
   // 暗色块只需覆盖随主题变化的颜色；间距/排版等主题无关 token 在 :root 定义后自动继承
-  const cssVarsDark = colorTokens.map(t => `${t.name}: ${t.dark};`).join('\n');
+  const cssVarsDark = tokenDeclarations(tokens, 'dark');
 
   tokenStyle.textContent = `
     :root { ${cssVarsLight} }
@@ -403,15 +423,24 @@ function renderComponents(tokens) {
   `;
 
   const demo = document.getElementById('component-demo');
-  demo.innerHTML = '<style>' + buildDemoCSS() + demoStyleCSS(currentDemoStyle) + '</style>' + ceSpecDefs() +
-    (currentDemoType === 'app' ? appDemoHTML() : landingDemoHTML());
+  const pageHTML = currentDemoType === 'app' ? appDemoHTML() : landingDemoHTML();
+  demo.innerHTML = '<style>' + buildDemoCSS() + demoStyleCSS(design.style) + buildModeCSS(design, window._lastSpaceScale) + buildRegionCSS(system.regions) + '</style>' + ceSpecDefs() +
+    applyRegionPlan(pageHTML, system.regions, design.mode, design.style);
 
   // 风格 class 挂到示例根元素：全屏克隆时自动携带
   const demoRoot = demo.querySelector('.ce-landing, .ce-app');
-  if (demoRoot) demoRoot.classList.add('ce-style-' + currentDemoStyle);
+  if (demoRoot) {
+    demoRoot.classList.add('ce-surface', 'ce-style-' + design.style);
+    demoRoot.dataset.ceMode = design.mode;
+    demoRoot.dataset.ceStrategy = design.strategy;
+  }
 
   // 规则条随风格切换（restoreState 直接改 currentDemoStyle 也经由此路径刷新）
   updateRulesStrip(currentDemoStyle);
+  const context = document.getElementById('preview-context');
+  if (context) context.textContent = design.surface.name + ' · ' + DESIGN_STRATEGIES[design.strategy].name + '（' + (design.strategySource === 'user' ? '你的选择' : '按用途推荐') + '）· ' + design.surface.purpose;
+  const overlay = document.getElementById('fullscreen-overlay');
+  if (overlay && overlay.classList.contains('open')) document.getElementById('fullscreen-demo').innerHTML = demo.innerHTML;
 
   // 色块 ↔ 组件双向高亮：demo 重新渲染后需重新绑定
   if (typeof setupBidirectionalHighlight === 'function') setupBidirectionalHighlight();
@@ -421,7 +450,7 @@ function setDemoType(type, btn) {
   currentDemoType = type;
   const btns = document.querySelectorAll('#demo-type-toggle .theme-toggle-btn');
   btns.forEach(b => b.classList.toggle('active', b.dataset.val === type));
-  if (_lastDemoTokens) renderComponents(_lastDemoTokens);
+  if (_lastDemoTokens) refreshDesignPresentation();
   if (typeof saveState === 'function') saveState();
 }
 
@@ -429,7 +458,7 @@ function setDemoStyle(style, btn) {
   currentDemoStyle = style;
   const btns = document.querySelectorAll('#demo-style-toggle .theme-toggle-btn');
   btns.forEach(b => b.classList.toggle('active', b.dataset.val === style));
-  if (_lastDemoTokens) renderComponents(_lastDemoTokens);
+  if (_lastDemoTokens) refreshDesignPresentation();
   if (typeof saveState === 'function') saveState();
 }
 
