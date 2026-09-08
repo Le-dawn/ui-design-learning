@@ -30,6 +30,7 @@ function renderExport(sys, tokens) {
 }
 
 // ── 风格提示词导出：tokens 具体值 + 当前风格 prompt，一键复制丢给 AI ──
+// 风格作用于整个项目（全站），当前示例页只是「先做到位」的主角页面。
 // 维护提示：提示词正文与 STYLES.md 第三节保持同步
 
 const STYLE_PROMPTS = {
@@ -92,16 +93,26 @@ const TOKEN_GROUP_LABELS = {
 };
 const TOKEN_GROUP_ORDER = ['accent', 'neutral', 'state', 'secondary', 'functional', 'elevation', 'radius', 'typography', 'space-scale', 'space-semantic'];
 
+// 项目级页面清单：风格作用于整个项目时的全站骨架（当前示例页为「主角页面」，全站页面同样遵循）
+const PROJECT_PAGES = [
+  { id: 'landing', name: '着陆页', spec: '顶栏导航 + Hero 主视觉 + 内容数据区 + 双栏信息区 + 页脚' },
+  { id: 'app', name: '工作台', spec: '左侧导航 + 顶栏（标题/搜索/用户）+ 内容面板网格' },
+  { id: 'list', name: '列表 / 表格页', spec: '工具栏 + 数据表格（行状态 + 操作列）+ 空状态' },
+  { id: 'form', name: '表单 / 设置页', spec: '分组卡片（标签 + 输入 + 辅助说明）+ 主 / 次按钮区' },
+  { id: 'modal', name: '弹层 / 菜单', spec: '浮层表面 + 阴影过渡 + ESC 关闭' },
+  { id: 'empty', name: '空状态 / 错误页', spec: '图标 + 一句话 + 单个主行动' }
+];
+
 function buildStylePromptExport(tokens) {
   const style = STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum;
-  const isApp = currentDemoType === 'app';
-  const scene = isApp
-    ? '工作台（Dashboard）：左侧导航 + 顶栏（标题/搜索/用户）+ 内容面板网格'
-    : '着陆页（Landing）：顶栏导航 + Hero 主视觉 + 内容数据区 + 双栏信息区 + 页脚';
+  const focusPage = currentDemoType === 'app' ? 'app' : 'landing';
 
   const lines = [];
-  lines.push('# 设计任务');
-  lines.push('请按以下规格生成一个「' + style.name + '」风格的' + (isApp ? '工作台' : '着陆页') + '，输出单文件 HTML + CSS（含亮色与暗色 data-theme="dark" 双主题）。');
+  lines.push('# 设计任务：全站统一风格（作用于整个项目）');
+  lines.push('请为整个项目设计一套统一视觉语言：以下风格与 tokens 作用于项目的**全部页面**——' +
+    '着陆页、工作台、列表/表格页、表单/设置页、弹层、空状态都必须遵守，而不是只做一个单页。' +
+    '当前以「' + (focusPage === 'app' ? '工作台' : '着陆页') + '」为主角示例页：先把它完整做到位，其余页面按同一套规则推导。' +
+    '输出全站共享 CSS + 各页面 HTML（亮色 / 暗色 data-theme="dark" 双主题）。');
   lines.push('');
   lines.push('## 设计 tokens（必须严格遵守，不得自造颜色 / 间距 / 字号 / 圆角 / 阴影）');
   lines.push('');
@@ -122,8 +133,16 @@ function buildStylePromptExport(tokens) {
   lines.push('## 风格');
   lines.push(style.body);
   lines.push('');
-  lines.push('## 页面结构');
-  lines.push(scene);
+  lines.push('## 页面清单（同一风格贯穿全站，每页先按骨架搭结构再填内容）');
+  PROJECT_PAGES.forEach(p => {
+    const mark = p.id === focusPage ? '（当前示例页：先完整做到位）' : '';
+    lines.push('- ' + p.name + '：' + p.spec + mark);
+  });
+  lines.push('');
+  lines.push('## 全站规则');
+  lines.push('- 单一风格源：整个项目只存在这一种风格；所有页面共享同一组 tokens 与同一套组件规范，页内不出现任何未在 tokens 中定义的视觉值');
+  lines.push('- 组件复用：按钮、输入框、卡片、表格、导航等组件全站复用同一实现（见「组件 CSS」导出），不逐页发明、不逐页另起炉灶');
+  lines.push('- 结构先于装饰：每页先按页面清单对应的骨架搭结构，再填内容；不得重排骨架，不得在单页里开「风格分支」');
   lines.push('');
   lines.push('## 约束');
   lines.push('- 只使用上面给出的 tokens，不得自造任何颜色、间距、字号、圆角、阴影');

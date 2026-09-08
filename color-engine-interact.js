@@ -401,6 +401,13 @@ function updateTweakLabels(h, c, l) {
   if (hEl) hEl.textContent = Math.round(h) + '°';
   if (cEl) cEl.textContent = c.toFixed(3);
   if (lEl) lEl.textContent = l.toFixed(2);
+
+  // 颜色预览：色块 + hex 随滑块实时刷新（oklchToHex 会自动色域裁剪）
+  var hex = oklchToHex(l, c, h);
+  var swatch = document.getElementById('tweak-swatch');
+  var hexEl = document.getElementById('tweak-hex');
+  if (swatch) swatch.style.background = hex;
+  if (hexEl) hexEl.textContent = hex;
 }
 
 function onTweakInput() {
