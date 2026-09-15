@@ -123,7 +123,7 @@ const DESIGN_PROFILES = {
     desc: '大圆角、柔和多层阴影、圆点状态——安全、好接近，适合面向普通用户的产品。',
     scene: 'C 端产品、教育、健康、电商、社区',
     avoid: '数据密集的管理后台、严肃企业工具（大圆角会显得不专业）',
-    defaultAccent: '#EF7B57',
+    defaultAccent: '#E4A339',   // 种子色：引擎渲染为 #EBA941 蜜金（浅色强调，自动配深墨字）
     fontNote: '圆润无衬线（SF Pro Rounded / Segoe UI Variable 系统栈），字距可放宽，少用等宽字体',
     materialNote: '材料色是浮起表面（surface-raised）与柔影，品牌色可活泼但一屏仍 ≤ 3 处',
     materialOverrides: false,
@@ -330,7 +330,7 @@ const DESIGN_PROFILES = {
     desc: '衬线标题、大留白、几乎无阴影——内容有分量，界面主动退场。',
     scene: '内容平台、媒体、品牌官网、文档站、博客',
     avoid: '数据面板、需要一眼扫完的操作界面（衬线加大留白会拖慢扫描）',
-    defaultAccent: '#9B3B2E',
+    defaultAccent: '#4B5E00',   // 种子色：引擎渲染为 #476100 橄榄（印刷感墨绿，避开红色家族）
     fontNote: '中文衬线标题（宋体 / STSong）+ 英文衬线（Georgia）；数据声部也用衬线，杂志里的数字是文字不是仪表',
     materialNote: '材料色是纸白底与细线分隔；强调色全场最多 1 处',
     materialOverrides: false,
@@ -342,7 +342,7 @@ const DESIGN_PROFILES = {
       '--ce-shadow-inset: none'
     ],
     css: `
-      .ce-landing.ce-style-editorial { gap: var(--space-7xl); }
+      .ce-style-editorial .ce-column { gap: var(--space-7xl); }
       .ce-style-editorial .ce-hero-title { letter-spacing: 0; }
       .ce-style-editorial .ce-logo-name { font-family: var(--ce-display); letter-spacing: .04em; }
       .ce-style-editorial .ce-btn { letter-spacing: .04em; }
@@ -426,7 +426,9 @@ const DESIGN_PROFILES = {
         --ce-ink: #F1E4CE; --ce-ink-2: #C3AC8C; --ce-ghost: #9C8567;
       }
 
-      /* ① 材料承担整页底色：褐在底上，不是只有按钮是棕色 */
+      /* ① 材料承担整页底色：褐在底上，不是只有按钮是棕色。
+         底色挂在满宽的页面层（.ce-landing / .ce-app）上，不挂在版心 .ce-column 上——
+         挂到版心上，容器比版心宽时就只剩中间一条褐。 */
       .ce-landing.ce-style-sepia, .ce-app.ce-style-sepia { background: var(--ce-paper); color: var(--ce-ink); }
       .ce-style-sepia .ce-hero-title, .ce-style-sepia .ce-plate-title, .ce-style-sepia .ce-split-title,
       .ce-style-sepia .ce-app-title, .ce-style-sepia .ce-panel-title, .ce-style-sepia .ce-feat-title,
@@ -477,7 +479,7 @@ const DESIGN_PROFILES = {
     ],
     prompt: {
       body: [
-        '- 表面：整页暖褐纸面（浅色约 #F2E3CB 底 / #FBF5E9 书页，深色约 #1C1510 底 / #251C15 书页），深褐墨字（浅色 #382B1E，深色 #F1E4CE）；不用阴影，用 1px 暖褐细线与双层版心边框分层',
+        '- 表面：整页暖褐纸面（浅色约 #F2E3CB 底 / #FBF5E9 书页，深色约 #1C1510 底 / #251C15 书页），深褐墨字（浅色 #382B1E，深色 #F1E4CE）；不用阴影，用 1px 暖褐细线与双层版心边框分层；底色铺在满宽页面层（.ce-landing / .ce-app），版心 .ce-column 只负责限宽，不要带底色',
         '- 构成：书页版心（外层实线 + 内层细线的双线框）、章节号（CHAPTER 01 类等宽小字）、页码、档案条目（档号 + 点线引导 + 值）',
         '- 字体：中文衬线标题与正文（宋体 / 思源宋体类），正文行高 1.85–1.9；编号、档号、页码用等宽字体',
         '- 强调色：只用于主按钮、链接、选中态与状态标记；不要用品牌色给整页或大区块染底',
@@ -485,7 +487,7 @@ const DESIGN_PROFILES = {
         '- 气质：旧书、档案馆、私人藏书——安静、有年份感、适合长读'
       ],
       keep: [
-        '整页暖褐纸面（材料色固定，不随品牌色改变）——这是本风格的识别点',
+        '整页暖褐纸面（材料色固定，不随品牌色改变；底色铺在满宽页面层，不缩在版心里）——这是本风格的识别点',
         '书页构成：双线版心 / 章节号 / 页码 / 档案条目点线，而不是普通卡片换底色',
         '衬线标题与正文 + 等宽编号的双声部',
         '品牌色只出现在行为与标记上，纸面不被染掉'

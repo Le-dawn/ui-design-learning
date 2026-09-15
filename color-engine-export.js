@@ -76,7 +76,9 @@ function buildAIPromptExport(tokens) {
   lines.push('<!-- 亮色 -->');
   lines.push('<html lang="zh-CN" data-theme="light">');
   lines.push('  <body class="ce-style-' + id + '">        <!-- 风格类：整站只挂一次 -->');
-  lines.push('    <main class="ce-landing">…</main>  <!-- 用途类：营销页 -->');
+  lines.push('    <main class="ce-landing">          <!-- 用途类：营销页（页面层：满宽，材料色铺在这里） -->');
+  lines.push('      <div class="ce-column">…</div>   <!-- 版心层：限宽正文列，七种风格共用 -->');
+  lines.push('    </main>');
   lines.push('    <main class="ce-app">…</main>      <!-- 用途类：工作台 -->');
   lines.push('  </body>');
   lines.push('</html>');
@@ -89,6 +91,7 @@ function buildAIPromptExport(tokens) {
   lines.push('- 第 4 节的组件 CSS 直接粘贴；第 5 节的四种用途骨架按你的页面套用，不要逐页发明样式');
   lines.push('- 主题切换只切 `data-theme`；`--color-*` 的暗色值已在 tokens 里给出');
   lines.push('- 若需要改变版式（例如把列表改成时间线），由你修改页面结构；**只换 CSS 变量无法完成所有风格转换**');
+  lines.push('- 页面层与版心层分开：`.ce-landing` / `.ce-app` 是满宽页面层（材料主导的风格在这里铺整页底色），`.ce-column` 只负责限宽正文列；**不要把页面底色挂到版心列上**，否则宽容器里会缩成中间一条');
 
   // ── 2. tokens ──
   lines.push('');

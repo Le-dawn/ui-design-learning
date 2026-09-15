@@ -253,6 +253,27 @@ function removeColorInput(btn) {
   markBrandColorExplicit();
 }
 
+/* ── 恢复默认色：清掉显式设置，回到当前风格的默认品牌色 ──
+   与 resetTweaks 的区别：那个只把实时调色滑块拉回当前强调色，
+   这个连 brandColorExplicit 一起清掉——之后切换风格又会自动套用
+   各风格的默认色（即「7 个案例各自的默认色」）。 */
+function useStyleDefaultAccent() {
+  const container = document.getElementById('color-inputs');
+  if (!container) return;
+
+  // 只留主角：配角是用户自己加的，不清掉就回不到默认
+  const groups = container.querySelectorAll('.input-color-group');
+  Array.prototype.slice.call(groups, 1).forEach(g => g.remove());
+
+  brandColorExplicit = false;
+  applyStyleDefaultAccent(currentDemoStyle);
+  const weight = container.querySelector('.input-color-group[data-index="0"] .weight-input');
+  if (weight) weight.value = 100;
+
+  // 静默生成：不滚动、不把预览主题切回亮色（滑块与本地状态由 generate 内部同步）
+  if (typeof generate === 'function') generate(true);
+}
+
 /* ── Logo 取色 ────────────────────────────────────── */
 
 (function() {
@@ -488,6 +509,7 @@ function onTweakInput() {
 
   if (_tweakTimer) clearTimeout(_tweakTimer);
   _tweakTimer = setTimeout(function() {
+    _tryAppliedSeed = null;   // 调色滑块生效后，试色带游标重新跟随渲染结果
     if (typeof retweak === 'function') {
       retweak(h, c, l);
     }
@@ -504,6 +526,166 @@ function resetTweaks() {
     retweak(lastAccentOklch.H, lastAccentOklch.C, lastAccentOklch.L);
   }
   document.getElementById('tweak-status').textContent = '已重置';
+}
+
+/* ── 试色带：在 OKLCH 宜居带上扫色，预览实时跟随 ──────
+   带上的每一格 = 该色相在宜居带的理想 L/C（也就是引擎校正的目标值本身），
+   所以拖到哪，页面渲染出来就是那个颜色；点一下即落成显式品牌色，
+   与手填 hex 完全等价（导出、复制给 AI 都跟着走）。 */
+
+// 某明度下这个色相在 sRGB 里能达到的最大色度（二分；宜居带的理想色度常常超出色域）
+function maxChromaAt(L, h) {
+  let lo = 0, hi = 0.37;
+  for (let i = 0; i < 16; i++) {
+    const mid = (lo + hi) / 2;
+    const rt = hexToOklch(oklchToHex(L, mid, h));
+    if (rt && rt.C >= mid - 0.005) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+
+// 该色相在宜居带里"能做到的最美版本"：先试理想明度，再在明度区间内退让
+function bandSeedForHue(h) {
+  const hh = ((h % 360) + 360) % 360;
+  const range = getOklchRange(hh);
+  const tries = [range.lIdeal, range.lIdeal + 0.03, range.lIdeal - 0.03, range.lMax, range.lMin];
+  for (let i = 0; i < tries.length; i++) {
+    const L = tries[i];
+    if (L < range.lMin || L > range.lMax) continue;
+    const C = Math.min(range.cIdeal, maxChromaAt(L, hh));
+    if (C >= range.cMin) return oklchToHex(L, C, hh);
+  }
+  return oklchToHex(range.lIdeal, range.cMin, hh);
+}
+
+// 带上一格 = 引擎渲染结果本身：先定种子，再过一遍同一条校正管线
+const _tryHueCache = new Map();
+function tryColorForHue(h) {
+  const key = Math.round(((h % 360) + 360) % 360);
+  const hit = _tryHueCache.get(key);
+  if (hit) return hit;
+  const seed = bandSeedForHue(key);
+  const acc = computeBeautifulAccent(hexToOklch(seed));
+  const out = { seed: seed, hex: acc.hex, on: acc.textContrastOnAccent };
+  _tryHueCache.set(key, out);
+  return out;
+}
+
+function tryColorRibbonGradient() {
+  _tryHueCache.clear();
+  const stops = [];
+  // 1° 一档（361 个停靠点）：轨道画出来的每一格都等于点下去会渲染出的颜色
+  for (let h = 0; h <= 360; h += 1) {
+    stops.push(tryColorForHue(h).hex + ' ' + (h / 3.6).toFixed(3) + '%');
+  }
+  return 'linear-gradient(90deg, ' + stops.join(', ') + ')';
+}
+
+// 色相带边界刻度：0 / 40 / 70 / 110 / 165 / 210 / 280 / 320 / 360
+const TRY_BAND_TICKS = [[0, '红'], [40, '橙'], [70, '黄'], [110, '绿'], [165, '青'], [210, '蓝'], [280, '紫'], [320, '洋红'], [360, '']];
+
+function renderTryTicks() {
+  const box = document.getElementById('try-ticks');
+  if (!box) return;
+  box.innerHTML = TRY_BAND_TICKS.map(function(t, i) {
+    const cls = 'try-tick' + (i === 0 ? ' is-first' : '') + (i === TRY_BAND_TICKS.length - 1 ? ' is-last' : '');
+    return '<span class="' + cls + '" style="left:' + (t[0] / 3.6).toFixed(3) + '%"><span>' + t[0] + '°</span></span>';
+  }).join('');
+}
+
+let _tryTimer = null;
+let _tryDragging = false;
+let _ribbonBuiltFor = null;
+let _tryAppliedSeed = null;   // 带子自己刚写进颜色输入的值（用来判断"这次渲染是不是带子造成的"）
+
+function applyTryHue(h) {
+  const first = document.querySelector('.input-color-group[data-index="0"]');
+  if (!first) return;
+  const hex = tryColorForHue(h).seed;
+  const picker = first.querySelector('input[type="color"]');
+  const hexInput = first.querySelector('.hex-input');
+  if (picker) picker.value = hex;
+  if (hexInput) hexInput.value = hex.toUpperCase();
+  _tryAppliedSeed = hex.toUpperCase();
+  markBrandColorExplicit();
+  // 静默生成：不滚动、不把预览主题切回亮色
+  if (typeof generate === 'function') generate(true);
+}
+
+// 度数读数：带子所在色相；管线微调过色相时补一个"渲染 N°"
+function updateTryHueReadout(pos, renderedHue) {
+  const el = document.getElementById('try-hue');
+  if (!el) return;
+  let html = 'H ' + pos + '°';
+  if (typeof renderedHue === 'number') {
+    const dist = Math.abs(((pos - renderedHue + 540) % 360) - 180);
+    if (dist >= 1) {
+      html += ' <span class="try-hue-rendered" title="引擎对这一段色相做了微调：实际渲染 ' + renderedHue + '°">→ ' + renderedHue + '°</span>';
+    }
+  }
+  el.innerHTML = html;
+}
+
+function onTryHueInput(e) {
+  _tryDragging = true;
+  const h = parseFloat(e.target.value);
+  // 拖动/按键当下就反馈：度数立刻走，色片与 hex 用带上那一格的预测色（整页重绘仍走 60ms 防抖）
+  const t = tryColorForHue(h);
+  updateTryHueReadout(Math.round(h), Math.round(hexToOklch(t.hex).H) % 360);
+  const chip = document.getElementById('try-chip');
+  const hexEl = document.getElementById('try-hex');
+  if (chip) chip.style.background = t.hex;
+  if (hexEl) hexEl.textContent = t.hex.toUpperCase();
+  if (_tryTimer) clearTimeout(_tryTimer);
+  _tryTimer = setTimeout(function() {
+    applyTryHue(h);
+    _tryDragging = false;
+  }, 60);
+}
+
+// 色片与 hex 读数跟随真实渲染结果（换风格 / 换主题 / 调色后都同步）
+function updateTryColorUI() {
+  const ribbon = document.getElementById('hue-ribbon');
+  const chip = document.getElementById('try-chip');
+  const hexEl = document.getElementById('try-hex');
+  if (!ribbon) return;
+  // 策略变了，带上的颜色会跟着变（克制会整体收敛），需要重铺
+  if (_ribbonBuiltFor !== currentStrategy) {
+    ribbon.style.background = tryColorRibbonGradient();
+    _ribbonBuiltFor = currentStrategy;
+  }
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-base').trim();
+  if (chip) chip.style.background = accent;
+  if (hexEl) hexEl.textContent = accent ? accent.toUpperCase() : '—';
+  const ok = hexToOklch(accent);
+  const renderedHue = ok ? Math.round(ok.H) % 360 : undefined;
+  if (_tryDragging) return;   // 拖动/按键中：度数读数由 onTryHueInput 当场更新
+
+  // 游标只在"颜色不是带子自己设的"时才回位（换风格 / 手填 hex / 恢复默认 / 实时调色）。
+  // 带子设的色绝不回位：管线会把色相微调（暖区最多 20°+），拿渲染色相反写游标会让
+  // 方向键原地打转——1° 一档的精度就没了。
+  const hexInput = document.querySelector('.input-color-group[data-index="0"] .hex-input');
+  const current = hexInput ? hexInput.value.trim().toUpperCase() : '';
+  if (!(_tryAppliedSeed && current === _tryAppliedSeed) && typeof renderedHue === 'number') {
+    ribbon.value = renderedHue;
+    _tryAppliedSeed = null;
+  }
+  updateTryHueReadout(Math.round(+ribbon.value), renderedHue);
+}
+
+function initTryColorBar() {
+  const ribbon = document.getElementById('hue-ribbon');
+  if (!ribbon) return;
+  ribbon.style.background = tryColorRibbonGradient();
+  _ribbonBuiltFor = currentStrategy;
+  renderTryTicks();
+  updateTryHueReadout(Math.round(+ribbon.value));
+  ribbon.addEventListener('input', onTryHueInput);
+  ribbon.addEventListener('change', function(e) {
+    _tryDragging = false;
+    applyTryHue(parseFloat(e.target.value));
+  });
+  updateTryColorUI();
 }
 
 /* ── 双向高亮：色块 ↔ 组件案例 ────────────────────── */
@@ -572,6 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
   generate(true);      // 静默初始化：立即生成并渲染完整预览，不滚动、不重置主题
   setPreviewTheme(currentPreviewTheme);   // 同步缩略图 / 比较样张的主题
   updatePreviewHint();
+  initTryColorBar();   // 试色带：宜居带光谱，拖动即换色
 
   ['tweak-h', 'tweak-c', 'tweak-l'].forEach(function(id) {
     var slider = document.getElementById(id);

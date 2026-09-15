@@ -101,6 +101,25 @@ input, textarea { caret-color: var(--ui-accent); }
 .toolbar-spacer { flex: 1; }
 .toolbar-hint { font-family: var(--ui-font-mono); font-size: .68rem; color: var(--ui-text-muted); }
 
+/* 试色带：OKLCH 宜居带光谱，拖动即在真实预览上试色（发丝框 + 3px 倒角，与仪器语言一致） */
+.try-color-bar { gap: 10px; }
+.try-label { font-size: .78rem; font-weight: 600; color: var(--ui-text-secondary); }
+.try-ribbon-wrap { position: relative; flex: 1 1 320px; max-width: 620px; padding-bottom: 15px; }
+.try-ribbon { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 12px; border: 1px solid var(--ui-border-strong); border-radius: 3px; cursor: crosshair; }
+.try-ticks { position: absolute; left: 3px; right: 3px; top: 11px; height: 15px; pointer-events: none; }
+.try-tick { position: absolute; top: 0; width: 1px; height: 4px; background: var(--ui-border-strong); }
+.try-tick span { position: absolute; top: 3px; left: 0; transform: translateX(-50%); font-family: var(--ui-font-mono); font-size: .56rem; font-weight: 400; color: var(--ui-text-muted); letter-spacing: .02em; white-space: nowrap; }
+.try-tick.is-first span { transform: none; }
+.try-tick.is-last span { transform: translateX(-100%); }
+.try-key-hint { font-family: var(--ui-font-mono); font-size: .62rem; color: var(--ui-text-muted); letter-spacing: .04em; }
+.try-hue { font-family: var(--ui-font-mono); font-size: .68rem; color: var(--ui-text-secondary); letter-spacing: .03em; min-width: 84px; }
+.try-hue .try-hue-rendered { color: var(--ui-text-muted); }
+.try-ribbon::-webkit-slider-thumb { -webkit-appearance: none; width: 6px; height: 20px; border-radius: 2px; background: var(--ui-ink); border: 1px solid var(--ui-surface); box-shadow: 0 0 0 1px var(--ui-ink); cursor: ew-resize; }
+.try-ribbon::-moz-range-thumb { width: 6px; height: 20px; border-radius: 2px; background: var(--ui-ink); border: 1px solid var(--ui-surface); box-shadow: 0 0 0 1px var(--ui-ink); cursor: ew-resize; }
+.try-ribbon:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+.try-chip { width: 18px; height: 18px; border-radius: 3px; border: 1px solid var(--ui-border-strong); flex: none; background: var(--ui-surface); }
+.try-hex { font-family: var(--ui-font-mono); font-size: .68rem; letter-spacing: .04em; color: var(--ui-text-secondary); min-width: 62px; }
+
 /* 折叠区：详细调整 / 高级导出 / 分析与检查 */
 details.adv { margin: 14px 0; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow); }
 details.adv > summary { padding: 15px 22px; font-size: .88rem; font-weight: 700; color: var(--ui-text); display: flex; align-items: center; gap: 10px; border-radius: var(--ui-radius-lg); }
@@ -215,7 +234,8 @@ details.adv > .adv-body > .card + .card { margin-top: 20px; padding-top: 20px; b
 #fullscreen-overlay { position: fixed; inset: 0; z-index: 2000; display: none; overflow-y: auto; background: var(--color-bg-primary); color: var(--color-text-primary); }
 #fullscreen-overlay.open { display: block; }
 #fullscreen-overlay * { box-sizing: border-box; }
-#fullscreen-overlay .ce-landing { max-width: min(1120px, 94vw); padding-top: var(--space-4xl); }
+#fullscreen-overlay .ce-landing { padding-top: var(--space-4xl); min-height: 100vh; }
+#fullscreen-overlay .ce-column { max-width: min(1120px, 94vw); }
 #fullscreen-overlay .ce-hero-title { font-size: clamp(1.85rem, 5vw, 3.4rem); }
 #fullscreen-overlay .ce-app { min-height: 100vh; border: none; border-radius: 0; }
 .fs-toolbar { position: fixed; top: 14px; right: 14px; z-index: 2001; display: flex; align-items: center; gap: 6px; background: var(--ui-surface); border: 1px solid var(--ui-border-strong); border-radius: var(--ui-radius); box-shadow: var(--ui-shadow-lg); padding: 5px; font-family: var(--ui-font-mono); }
@@ -318,6 +338,22 @@ details.adv[open] > summary { margin-bottom: 0; }
       <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
     </div>
 
+    <!-- 试色带：在 OKLCH 宜居带上扫色，预览实时跟随（每一格就是引擎会渲染出来的强调色） -->
+    <div class="preview-toolbar try-color-bar">
+      <span class="try-label">试色</span>
+      <div class="try-ribbon-wrap">
+        <input type="range" id="hue-ribbon" class="try-ribbon" min="0" max="359" step="1" value="45"
+               aria-label="试色带：聚焦后用左右方向键按 1° 微调，或直接拖动；右侧预览实时更新"
+               title="拖动或按 ← → 微调（1° 一档）：每一格就是引擎会渲染出来的强调色">
+        <div class="try-ticks" id="try-ticks" aria-hidden="true"></div>
+      </div>
+      <span class="try-key-hint" title="聚焦色带后，左右方向键按 1° 微调；Home / End 直达两端">← → 1°</span>
+      <span class="try-hue" id="try-hue" aria-live="polite">H —°</span>
+      <span class="try-chip" id="try-chip" aria-hidden="true"></span>
+      <span class="try-hex" id="try-hex">—</span>
+      <button class="btn btn-sm btn-outline" onclick="useStyleDefaultAccent()" title="回到当前风格的默认强调色（与品牌色区的「恢复默认色」同一个动作）">回到风格默认</button>
+    </div>
+
     <!-- 主预览 -->
     <div class="card" id="comp-preview-card">
       <div id="component-demo"></div>
@@ -336,7 +372,7 @@ details.adv[open] > summary { margin-bottom: 0; }
     <div class="adv-body">
       <div class="card">
         <div class="section-title" style="margin-bottom:14px">品牌色与色彩策略</div>
-        <p class="note" style="margin:-6px 0 14px">不填也能用：未显式设置品牌色时，每种风格使用它自己的默认色（标准偏蓝、暖糖偏暖、流光偏紫、书卷偏砖红、褐页偏褐、构色偏朱红、展厅偏青绿）。显式设置后，切换风格会保留你的颜色。</p>
+        <p class="note" style="margin:-6px 0 14px">不填也能用：未显式设置品牌色时，每种风格使用它自己的默认色（标准偏蓝、暖糖偏金、流光偏紫、书卷偏橄榄、褐页偏褐、构色偏朱红、展厅偏青绿）。显式设置后，切换风格会保留你的颜色；想回到风格默认色，点「恢复默认色」。</p>
 
         <div class="drop-zone" id="drop-zone">
           <span class="dz-icon">
@@ -373,6 +409,7 @@ details.adv[open] > summary { margin-bottom: 0; }
         </div>
         <div class="btn-row">
           <button class="btn btn-outline btn-sm" onclick="addColorInput()">+ 添加颜色</button>
+          <button class="btn btn-outline btn-sm" onclick="useStyleDefaultAccent()" title="清掉显式设置的品牌色，回到当前风格的默认色；之后切换风格会重新跟随各风格默认色">恢复默认色</button>
           <button class="btn btn-primary" onclick="generate()">重新生成色彩系统</button>
         </div>
 

@@ -58,8 +58,12 @@ function buildDemoCSS() {
     .ce-text-link { color: var(--color-accent-active); font-weight: 600; font-size: .9rem; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--color-accent-base) 45%, transparent); text-underline-offset: 4px; cursor: pointer; }
     .ce-text-link:hover { text-decoration-color: var(--color-accent-base); }
 
-    /* ── 着陆页骨架 ── */
-    .ce-landing { max-width: 920px; margin: 0 auto; padding: var(--space-2xl) 0 var(--space-5xl); display: flex; flex-direction: column; gap: var(--space-6xl); }
+    /* ── 着陆页骨架：页面层 + 版心层 ──
+       页面层（.ce-landing）满宽，材料主导的风格（褐页）在这里铺整页底色；
+       版心层（.ce-column）只负责正文列宽与纵向节奏。底色绝不挂在版心上，
+       否则容器比版心宽时，纸面会缩成中间一条褐。 */
+    .ce-landing { padding: var(--space-2xl) 0 var(--space-5xl); }
+    .ce-column { max-width: 920px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6xl); }
     .ce-topbar { display: flex; align-items: center; gap: var(--space-md); }
     .ce-logo { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: inherit; }
     .ce-logo-mark { display: inline-flex; }
@@ -267,7 +271,8 @@ function buildToolPreviewCSS() {
     /* 缩略预览：真实样式 2.5× 内容 + 0.4 缩放，保证与完整案例一致 */
     .ce-thumb { position: relative; height: 126px; overflow: hidden; background: var(--color-bg-primary); }
     .ce-thumb-inner { width: 250%; transform: scale(.4); transform-origin: 0 0; }
-    .ce-thumb-inner .ce-landing { max-width: none; margin: 0; padding: var(--space-xl) var(--space-xl) 0; gap: var(--space-xl); }
+    .ce-thumb-inner .ce-landing { padding: var(--space-xl) var(--space-xl) 0; }
+    .ce-thumb-inner .ce-column { max-width: none; gap: var(--space-xl); }
     /* 缩略图里 vw 指的是真实视口，不是缩略图宽度——必须在这里改成固定字号。
        否则用 vw 定义大标题的风格（如构色的 clamp(2.2rem, 6.2vw, 4.1rem)）会按 1440px
        视口算出 65px 字，塞进 390px 宽的缩略图里直接溢出。
@@ -281,7 +286,8 @@ function buildToolPreviewCSS() {
     .ce-compare-cell { border: 1px solid var(--color-border); background: var(--color-bg-primary); }
     .ce-compare-label { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--color-border); font-size: .72rem; font-weight: 700; }
     .ce-compare-label span { font-family: var(--ce-mono, monospace); font-size: .6rem; letter-spacing: .08em; color: var(--color-text-secondary); font-weight: 400; }
-    .ce-compare-page { padding: var(--space-lg); gap: var(--space-lg); }
+    .ce-compare-page { padding: var(--space-lg); }
+    .ce-compare-page .ce-column { gap: var(--space-lg); }
     .ce-compare-page .ce-hero-title { font-size: 1.3rem; line-height: 1.15; }
     .ce-compare-page .ce-hero-sub { font-size: .8rem; margin-top: 8px; }
     .ce-compare-page .ce-hero-actions { margin-top: var(--space-md); }
@@ -453,7 +459,7 @@ function galleryWorkHTML(work) {
 /* ── 着陆页：标准 / 暖糖 / 书卷保持既有内容与编排 ──────── */
 
 function standardLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 16 L9 9 L13 13 L20 5" stroke="var(--color-accent-base)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="20" cy="5" r="2" fill="var(--color-accent-base)"/></svg>' +
@@ -531,11 +537,11 @@ function standardLandingHTML() {
       '<span>PULSE · 增长分析平台</span>' +
       '<span>示例数据为合成演示，非真实业务记录</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 function softLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 4a8 8 0 1 0 7.2 11.2A7 7 0 0 1 12 4z" stroke="var(--color-accent-base)" stroke-width="1.8" stroke-linejoin="round"/></svg>' +
@@ -608,11 +614,11 @@ function softLandingHTML() {
       '<span>舒心 · 睡眠与放松</span>' +
       '<span>示例数据为合成演示，非真实健康记录</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 function editorialLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 4v16M5 4h9a3 3 0 0 1 3 3v13M5 8h9M5 12h9M5 16h7" stroke="var(--color-accent-base)" stroke-width="1.6" stroke-linejoin="round"/></svg>' +
@@ -688,7 +694,7 @@ function editorialLandingHTML() {
       '<span>知卷 · 城市生活月刊</span>' +
       '<span>示例内容为合成演示，非真实刊物</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 /* ── 着陆页：流光（本轮重做） ──────────────────────────
@@ -697,7 +703,7 @@ function editorialLandingHTML() {
    玻璃只出现在顶栏与主视觉卡，其余表面稳定可读。 */
 
 function glassLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.4" stroke="var(--color-accent-base)" stroke-width="1.8"/><path d="M12 8.6V4.2M12 19.8v-4.4M15.4 12h4.4M4.2 12h4.4" stroke="var(--color-text-secondary)" stroke-width="1.2" opacity=".55"/></svg>' +
@@ -775,7 +781,7 @@ function glassLandingHTML() {
       '<span>NEXUS · AI 智能排程平台</span>' +
       '<span>示例数据为合成演示，非真实运行记录</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 /* ── 着陆页：褐页（新增） ──────────────────────────────
@@ -783,7 +789,7 @@ function glassLandingHTML() {
    材料色由风格自带（不随品牌色变化），品牌色只用于行动与标记。 */
 
 function sepiaLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="17" height="17" stroke="var(--color-accent-base)" stroke-width="1.4"/><path d="M8 8h8M8 12h8M8 16h4" stroke="var(--ce-ink-2)" stroke-width="1.2"/></svg>' +
@@ -849,7 +855,7 @@ function sepiaLandingHTML() {
       '<span>藏卷 · 档案与旧书</span>' +
       '<span>示例内容为合成演示，非真实文献记录</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 /* ── 着陆页：构色（新增） ──────────────────────────────
@@ -857,7 +863,7 @@ function sepiaLandingHTML() {
    色块有信息职责（主题活动 / 行动），不做无内容的装饰拼贴。 */
 
 function posterLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" fill="var(--color-accent-base)"/><path d="M8 16l4-8 4 8z" fill="var(--color-text-emphasis)"/></svg>' +
@@ -912,7 +918,7 @@ function posterLandingHTML() {
       '<span>开物 · 创意工作室</span>' +
       '<span>示例内容为合成演示，非真实业务记录</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 /* ── 着陆页：展厅（新增） ──────────────────────────────
@@ -920,7 +926,7 @@ function posterLandingHTML() {
    素材为项目自制演示图形，本地引用（不使用远程图链）。 */
 
 function galleryLandingHTML() {
-  return '<div class="ce-landing">' +
+  return '<div class="ce-landing"><div class="ce-column">' +
     '<nav class="ce-topbar">' +
       '<a class="ce-logo" href="#">' +
         '<svg class="ce-logo-mark" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2.5" y="2.5" width="19" height="19" stroke="var(--color-text-primary)" stroke-width="1.2"/><rect x="7" y="7" width="10" height="10" fill="var(--color-accent-base)"/></svg>' +
@@ -972,7 +978,7 @@ function galleryLandingHTML() {
       '<span>白盒 · 当代艺术空间</span>' +
       '<span>作品图片为项目自制演示素材，非真实收藏</span>' +
     '</footer>' +
-  '</div>';
+  '</div></div>';
 }
 
 function landingDemoHTML() {
@@ -1429,7 +1435,7 @@ function styleThumbInner(style) {
   // aria-hidden：缩略图是「画面」，读屏由卡片自身的名称与说明承担，避免读出两遍内容
   return '<div class="ce-thumb" aria-hidden="true">' +
     '<div class="ce-thumb-inner">' +
-      '<div class="ce-landing ce-style-' + p.id + '">' +
+      '<div class="ce-landing ce-style-' + p.id + '"><div class="ce-column">' +
         '<nav class="ce-topbar">' +
           '<a class="ce-logo" href="#"><span class="ce-logo-name">' + p.name + '</span><span class="ce-logo-sub">' + p.en + '</span></a>' +
           '<nav class="ce-nav"><span class="ce-nav-link">导航一</span><span class="ce-nav-link">导航二</span></nav>' +
@@ -1445,6 +1451,7 @@ function styleThumbInner(style) {
           '<figure class="ce-prism">' + thumbMediaFor(p.id) + '</figure>' +
         '</header>' +
         thumbRowFor(p.id) +
+      '</div>' +
       '</div>' +
     '</div>' +
   '</div>';
@@ -1523,7 +1530,7 @@ function compareSampleHTML() {
     const p = getProfile(id);
     return '<div class="ce-compare-cell" data-theme="' + previewTheme() + '">' +
       '<div class="ce-compare-label">' + escapeHtml(p.name) + ' <span>' + escapeHtml(p.en) + '</span></div>' +
-      '<div class="ce-landing ce-style-' + p.id + ' ce-compare-page">' +
+      '<div class="ce-landing ce-style-' + p.id + ' ce-compare-page"><div class="ce-column">' +
         /* 标题里主动断行：中文在无断点时会逐字折行，等格宽下会断出「算清 / 楚」这种半个词。
            真实案例里每套标题也都是显式 <br>，这里保持一致，顺带让七个格子折行位置可比。 */
         '<h3 class="ce-hero-title">把每一次转化<br>算清楚</h3>' +
@@ -1540,6 +1547,7 @@ function compareSampleHTML() {
           '<span class="ce-row-desig">渠道转化日报</span>' +
           '<span class="ce-row-time">09:00</span>' +
           '<span class="ce-row-status is-success">已就绪</span>' +
+        '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1613,6 +1621,7 @@ function renderComponents(tokens) {
   }
   renderCompareSample();
   updateRulesStrip(currentDemoStyle);
+  if (typeof updateTryColorUI === 'function') updateTryColorUI();
 
   if (typeof setupBidirectionalHighlight === 'function') setupBidirectionalHighlight();
 }
