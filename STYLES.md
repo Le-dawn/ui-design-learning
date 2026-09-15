@@ -289,8 +289,10 @@
 | `design-profiles.js` → `DESIGN_PROFILES[id].css` | 作用域样式：只写 `.ce-style-<id>` 下的规则，不写全局选择器 |
 | `design-profiles.js` → `prompt` / `rules` / `purposes` | 导出用文案：必须保留的特征、规避项、每种页面用途的做法 |
 
-案例构建函数（`color-engine-demo.js`）只负责内容与编排；缩略图、比较样张、导出
-全部从这份注册表派生，改一处即三处生效。
+案例构建函数（`color-engine-demo-landing.js` / `color-engine-demo-app.js`）只负责内容
+与编排；骨架样式在 `color-engine-demo-css.js`，图形在 `color-engine-demo-figures.js`，
+缩略图 / 比较样张 / 渲染入口在 `color-engine-demo-shell.js`——全部从这份注册表派生，
+改一处即多处生效。
 
 新增风格时必须同时提供：**完整着陆页 + 完整工作台**，且包含足以验证风格的标题、正文、
 导航、按钮、输入、内容列表／卡片与状态；只有色板或孤立按钮不算一个风格。

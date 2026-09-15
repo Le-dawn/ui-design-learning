@@ -57,7 +57,11 @@ python3 -m http.server 8080
 | `detector-engine.js` | 生成后全量自检规则（确定性规则，无需 LLM） |
 | `color-engine-render.js` | 渲染函数（分析区/色板/Token 表）与 Token 数据源 |
 | `design-profiles.js` | **风格注册表**：七种风格的默认色、世界变量、作用域样式、材料色、导出文案与用途适配 |
-| `color-engine-demo.js` | 案例装配：共享骨架 + 各风格的着陆页/工作台、缩略图与比较样张 |
+| `color-engine-demo-css.js` | 案例骨架样式：七风格共用的组件 CSS、工具预览构件、导出 CSS 入口 |
+| `color-engine-demo-figures.js` | 案例图形与作品数据：谱线 / 折线 / 呼吸环 / 管线图 / 报头 / 书页 / 海报标记 |
+| `color-engine-demo-landing.js` | 七种风格的着陆页案例（同一骨架，七套内容与编排） |
+| `color-engine-demo-app.js` | 七种风格的工作台案例（侧栏 + 顶栏 + 面板网格） |
+| `color-engine-demo-shell.js` | 预览外壳：演示状态、风格选择卡与缩略图、比较样张、规则条、渲染入口 |
 | `color-engine-export.js` | 导出层：主出口「复制给 AI」+ 高级导出（CSS 变量/组件 CSS/风格提示词/Tailwind/JSON） |
 | `color-engine-interact.js` | 交互 · 风格切换 · 复制 · Logo 取色 · 持久化 · 启动 |
 | `assets/work-demo-01…06.svg` | 展厅案例的演示图形（项目自制，非第三方素材） |
@@ -70,7 +74,9 @@ python3 -m http.server 8080
 color-math.js → design-profiles.js
 → color-engine-palette.js → color-engine-core.js
 → space-engine-core.js → detector-engine.js
-→ color-engine-render.js → color-engine-demo.js
+→ color-engine-render.js
+→ color-engine-demo-css.js → color-engine-demo-figures.js
+→ color-engine-demo-landing.js → color-engine-demo-app.js → color-engine-demo-shell.js
 → color-engine-export.js → color-engine-interact.js
 ```
 

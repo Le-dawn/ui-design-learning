@@ -2,7 +2,7 @@
    COLOR ENGINE EXPORT — 导出层
    主出口：一次复制给 AI（tokens + 当前风格 + 组件 CSS + 用途规则 + 资源说明）
    高级出口：CSS 变量 / 组件 CSS / 风格提示词 / Tailwind / JSON（保持可用）
-   依赖：color-math.js, design-profiles.js, color-engine-demo.js
+   依赖：color-math.js, design-profiles.js, color-engine-demo-css.js（导出组件 CSS）
    ============================================================ */
 
 let currentExportFormat = 'ai';
