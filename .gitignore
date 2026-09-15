@@ -24,9 +24,11 @@ node_modules/
 .opencode/
 .pi/
 .qoder/
+.workbuddy/
 
 # ── impeccable 运行时状态（决策页、评审截图、缓存，均可再生成） ──
 .impeccable/
 
 # ── 开源参考项目（嵌套 git 仓库 428MB，不作为本仓库内容，仅本地参考） ──
 open-projects/
+

@@ -9,6 +9,7 @@
    光谱世界 · 纸面光谱图 — 工具自身 UI
    ground = 纸白 · structure = 墨灰发丝线 · 唯一强调 = 光谱红
    倒角 3px · tabular 数字 · 无圆角胶囊
+   注：这是工具外壳的品牌（纸面光谱），与「生成给外部项目的 7 种风格」是两件事。
    ════════════════════════════════════════════════════════ */
 :root {
   --ui-bg: #F2F1EB;
@@ -66,6 +67,50 @@ input, textarea { caret-color: var(--ui-accent); }
 .card { background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); padding: 24px; box-shadow: var(--ui-shadow); }
 .card + .card { margin-top: 14px; }
 
+/* ── 第一屏：看效果 → 选方案 → 复制给 AI ── */
+.stage { margin: 22px 0 6px; }
+.stage-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+.stage-title { font-family: var(--ui-font-display); font-size: 1.34rem; font-weight: 700; letter-spacing: -.01em; }
+.stage-sub { margin-top: 6px; font-size: .84rem; color: var(--ui-text-secondary); max-width: 64ch; line-height: 1.6; }
+.stage-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn-lg { padding: 13px 24px; font-size: .92rem; }
+.copy-state { font-size: .74rem; font-family: var(--ui-font-mono); color: var(--ui-accent); }
+.case-notice { display: flex; gap: 9px; align-items: flex-start; padding: 10px 14px; background: var(--ui-surface); border: 1px solid var(--ui-border); border-left: 3px solid var(--ui-accent); border-radius: var(--ui-radius); font-size: .76rem; color: var(--ui-text-secondary); line-height: 1.6; margin-bottom: 16px; }
+.case-notice .cn-k { font-family: var(--ui-font-mono); font-size: .68rem; letter-spacing: .08em; color: var(--ui-accent); flex-shrink: 0; padding-top: 1px; }
+
+/* 风格选择：缩略预览从真实样式生成。
+   列宽按「七种风格排成一行」定：容器约 1176px，(1176 - 6×12) / 7 ≈ 158px，
+   所以 minmax 取 150px。七张一排既紧凑，也不会剩一张孤卡把预览挤下去。 */
+.style-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+/* 风格卡是 div[role=radio] 而不是 button：卡内缩略图本身含有按钮与链接，
+   真 button 会被 HTML 解析器在这些内层元素处提前闭合，内容散成兄弟节点、整块塌掉 */
+.ce-style-card { display: flex; flex-direction: column; padding: 0; text-align: left; background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); overflow: hidden; cursor: pointer; font-family: var(--ui-font-body); transition: border-color .15s, box-shadow .15s, transform .15s; }
+.ce-style-card:hover { border-color: var(--ui-accent); transform: translateY(-1px); }
+.ce-style-card.is-active { border-color: var(--ui-accent); box-shadow: 0 0 0 2px var(--ui-accent-soft); }
+.ce-style-card:focus-visible { outline: 2px solid var(--ui-accent); outline-offset: 2px; }
+/* 缩略图里的按钮/链接只是画面内容，不参与交互与焦点 */
+.ce-style-card .ce-thumb { pointer-events: none; }
+.ce-style-card .ce-thumb-inner { pointer-events: none; }
+.ce-style-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 9px 12px 0; }
+.ce-style-meta b { font-size: .84rem; font-weight: 700; color: var(--ui-text); }
+.ce-style-meta i { font-family: var(--ui-font-mono); font-size: .6rem; letter-spacing: .1em; font-style: normal; color: var(--ui-text-muted); text-transform: uppercase; }
+.ce-style-desc { padding: 2px 12px 11px; font-size: .72rem; color: var(--ui-text-secondary); line-height: 1.5; }
+
+/* 预览工具条 */
+.preview-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.toolbar-spacer { flex: 1; }
+.toolbar-hint { font-family: var(--ui-font-mono); font-size: .68rem; color: var(--ui-text-muted); }
+
+/* 折叠区：详细调整 / 高级导出 / 分析与检查 */
+details.adv { margin: 14px 0; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); background: var(--ui-surface); box-shadow: var(--ui-shadow); }
+details.adv > summary { padding: 15px 22px; font-size: .88rem; font-weight: 700; color: var(--ui-text); display: flex; align-items: center; gap: 10px; border-radius: var(--ui-radius-lg); }
+details.adv > summary .num { font-family: var(--ui-font-mono); font-size: .68rem; font-weight: 600; letter-spacing: .08em; color: var(--ui-accent); background: var(--ui-accent-soft); border: 1px solid rgba(214,69,46,.28); padding: 2px 7px; border-radius: 2px; }
+details.adv > summary .sum-hint { font-weight: 400; font-size: .76rem; color: var(--ui-text-muted); }
+details.adv[open] > summary { border-bottom: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 0 0; }
+details.adv > .adv-body { padding: 20px 22px 24px; }
+details.adv > .adv-body > .card { box-shadow: none; border: none; padding: 0; background: none; }
+details.adv > .adv-body > .card + .card { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--ui-border); }
+
 /* Input Area */
 .input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
 .input-color-group { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--ui-bg); border: 1px dashed var(--ui-border-strong); border-radius: var(--ui-radius); }
@@ -91,7 +136,7 @@ input, textarea { caret-color: var(--ui-accent); }
 .btn-outline:hover { border-color: var(--ui-accent); color: var(--ui-accent); }
 .btn-sm { padding: 6px 14px; font-size: .74rem; }
 
-/* Swatch Grid — 每块色片是一块编号图版 */
+/* Swatch Grid */
 .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
 .swatch { position: relative; border-radius: var(--ui-radius); overflow: hidden; border: 1px solid var(--ui-border); background: var(--ui-surface); }
 .swatch-preview { height: 64px; position: relative; display: flex; align-items: center; justify-content: center; }
@@ -101,7 +146,7 @@ input, textarea { caret-color: var(--ui-accent); }
 .swatch-info .hex { font-size: .74rem; font-family: var(--ui-font-mono); color: var(--ui-text); }
 .swatch-info .hsl-label { font-size: .68rem; color: var(--ui-text-muted); margin-top: 2px; }
 
-/* Dual column (light/dark) — 仪器读数标签 */
+/* Dual column (light/dark) */
 .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 768px) { .dual-grid { grid-template-columns: 1fr; } }
 .dual-col-label { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: 500; font-family: var(--ui-font-mono); letter-spacing: .06em; margin-bottom: 10px; padding: 3px 9px; border-radius: 2px; }
@@ -122,14 +167,14 @@ input, textarea { caret-color: var(--ui-accent); }
 .analysis-item .detail .mini-swatch { display: inline-block; width: 18px; height: 18px; border-radius: 2px; border: 1px solid var(--ui-border); vertical-align: middle; }
 .analysis-item .detail .arrow { color: var(--ui-text-muted); margin: 0 2px; }
 
-/* Segmented control — 发丝分段，激活态墨底 */
+/* Segmented control */
 .theme-toggle-bar { display: inline-flex; gap: 2px; background: var(--ui-bg); border: 1px solid var(--ui-border-strong); padding: 2px; border-radius: var(--ui-radius); width: fit-content; }
 .theme-toggle-btn { padding: 5px 12px; border: none; background: none; border-radius: 2px; font-size: .74rem; font-weight: 600; cursor: pointer; color: var(--ui-text-secondary); font-family: var(--ui-font-body); transition: background .15s, color .15s; }
 .theme-toggle-btn:hover { color: var(--ui-text); }
 .theme-toggle-btn.active { background: var(--ui-ink); color: #F2F1EB; }
 
 /* CSS Output — 墨板 */
-.css-block { background: var(--ui-ink); color: #DDD9CD; padding: 20px 24px; border-radius: var(--ui-radius-lg); border: 1px solid #33333A; overflow-x: auto; font-family: var(--ui-font-mono); font-size: .78rem; line-height: 1.75; position: relative; white-space: pre; }
+.css-block { background: var(--ui-ink); color: #DDD9CD; padding: 20px 24px; border-radius: var(--ui-radius-lg); border: 1px solid #33333A; overflow-x: auto; font-family: var(--ui-font-mono); font-size: .78rem; line-height: 1.75; position: relative; white-space: pre; max-height: 520px; }
 .css-block .copy-btn { position: absolute; top: 12px; right: 12px; background: #26262C; color: #E8E5DB; border: 1px solid #3D3D45; }
 .css-block code { display: block; }
 .token-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
@@ -147,29 +192,29 @@ input, textarea { caret-color: var(--ui-accent); }
 
 /* Logo 取色区 */
 .drop-zone { border: 1.5px dashed var(--ui-border-strong); border-radius: var(--ui-radius-lg); padding: 22px; text-align: center; cursor: pointer; background: var(--ui-surface); margin-bottom: 14px; transition: border-color .2s, background .2s; }
+.drop-zone:hover { border-color: var(--ui-accent); }
+.drop-zone.dragover { border-color: var(--ui-accent); background: var(--ui-accent-soft); }
+.drop-zone .dz-icon { margin-bottom: 6px; color: var(--ui-accent); display: inline-flex; }
 
 /* 60-30-10 定理可视化 */
 .golden-rule { margin-bottom: 20px; border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); overflow: hidden; background: var(--ui-surface); }
 .golden-rule-bands { display: flex; height: 26px; }
 .golden-rule-bands .gr-band { display: block; min-width: 0; }
 .golden-rule-labels { display: flex; justify-content: space-between; padding: 5px 10px; border-top: 1px solid var(--ui-border); font-family: var(--ui-font-mono); font-size: .62rem; color: var(--ui-text-muted); letter-spacing: .06em; }
-.drop-zone:hover { border-color: var(--ui-accent); }
-.drop-zone.dragover { border-color: var(--ui-accent); background: var(--ui-accent-soft); }
-.drop-zone .dz-icon { margin-bottom: 6px; color: var(--ui-accent); display: inline-flex; }
 
-/* 设计约定规则条 */
-.rules-strip { display: flex; flex-direction: column; gap: 7px; padding: 14px 18px; background: var(--ui-bg); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); margin-bottom: 22px; font-size: .78rem; color: var(--ui-text-secondary); }
+/* 设计约定规则条（跟随当前风格） */
+.rules-strip { display: flex; flex-direction: column; gap: 7px; padding: 14px 18px; background: var(--ui-surface); border: 1px solid var(--ui-border); border-radius: var(--ui-radius-lg); margin-top: 14px; font-size: .78rem; color: var(--ui-text-secondary); }
 .rules-strip-title { font-size: .74rem; font-weight: 700; color: var(--ui-text); margin-bottom: 2px; font-family: var(--ui-font-display); }
 .rules-strip-title .rs-hint { font-weight: 400; color: var(--ui-text-muted); font-family: var(--ui-font-body); }
 .rules-strip-item { line-height: 1.6; }
 .rules-strip-item .rs-k { font-family: var(--ui-font-mono); font-size: .74rem; color: var(--ui-accent); font-weight: 600; margin-right: 6px; }
 
-/* 全屏预览覆盖层（示例占满整个视口，tokens 实时生效） */.fs-open { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ui-accent); border-radius: var(--ui-radius); background: var(--ui-accent-soft); color: var(--ui-accent); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); letter-spacing: .04em; transition: background .15s, color .15s; }
+/* 全屏预览覆盖层 */
+.fs-open { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--ui-accent); border-radius: var(--ui-radius); background: var(--ui-accent-soft); color: var(--ui-accent); font-size: .72rem; font-weight: 600; cursor: pointer; font-family: var(--ui-font-mono); letter-spacing: .04em; transition: background .15s, color .15s; }
 .fs-open:hover { background: var(--ui-accent); color: #FFF; }
 #fullscreen-overlay { position: fixed; inset: 0; z-index: 2000; display: none; overflow-y: auto; background: var(--color-bg-primary); color: var(--color-text-primary); }
 #fullscreen-overlay.open { display: block; }
 #fullscreen-overlay * { box-sizing: border-box; }
-/* 全屏下内容列加宽，标题随视口放大——窄条居中在宽屏上会显得空 */
 #fullscreen-overlay .ce-landing { max-width: min(1120px, 94vw); padding-top: var(--space-4xl); }
 #fullscreen-overlay .ce-hero-title { font-size: clamp(1.85rem, 5vw, 3.4rem); }
 #fullscreen-overlay .ce-app { min-height: 100vh; border: none; border-radius: 0; }
@@ -201,29 +246,26 @@ input, textarea { caret-color: var(--ui-accent); }
 
 summary { cursor: pointer; font-weight: 600; font-size: .86rem; padding: 4px 0; color: var(--ui-text-secondary); }
 summary:hover { color: var(--ui-accent); }
-details[open] summary { margin-bottom: 12px; }
+details[open] > summary { margin-bottom: 12px; }
+details.adv[open] > summary { margin-bottom: 0; }
 
-/* Detector 明细中的内联 JSON 不允许撑破页面（375px 横向溢出根因） */
 #detector-detail-content { overflow-wrap: anywhere; word-break: break-all; }
 
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
   .card { padding: 18px; }
-  /* 间距条的固定内联宽度（最大 323px）在窄屏撑破页面：允许换行 + 收缩 */
   .space-bar-row { flex-wrap: wrap; row-gap: 4px; }
   .space-bar { flex-shrink: 1; }
+  .stage-title { font-size: 1.12rem; }
+  .style-picker { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
 }
 </style>
 </head>
 <body>
 <!--
   THESIS: 白光进棱镜散成整条光谱——品牌色进系统，散成整套色阶。
-  OWN-WORLD: 纸面光谱图——纸白地面、墨灰发丝线、发丝刻度尺与 tabular 数字；光谱红是唯一强调，
-  光谱带只出现在语义位置；倒角 3px、无圆角胶囊；展示用 Geologica，正文系统栈，数据用 IBM Plex Mono。
-  STORY: 访客理解「美学可被推导」，相信输入品牌色即可得到完整可用的设计系统，然后动手生成并复制导出。
-  FIRST VIEWPORT: 纸白页面上，棱镜三角将品牌光散成 60-30-10 色阶带，主操作「生成色彩系统」是唯一的高对比按钮。
-  FORM: 我自拟 7 个接地方向中的第 7 个（光谱世界），seed key 17b843f1。
-  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+  OWN-WORLD: 工具外壳沿用纸面光谱图；而「生成给外部项目」的风格是另一份阵容（7 种）。
+  STORY: 打开即看见成品 → 用缩略图选风格 → 一次复制给 AI；专业参数与检查信息收进折叠区。
 -->
 
 <div class="header">
@@ -234,265 +276,165 @@ details[open] summary { margin-bottom: 12px; }
     </svg>
     <h1>Color Engine</h1>
     <span class="badge">UI 色彩系统生成器</span>
-    <span class="chain">品牌色 → 强调色 → 中性色 → 辅助色 → 功能色 → <b>Token</b></span>
+    <span class="chain">品牌色 → 强调色 → 中性色 → 辅助色 → 功能色 → <b>Token + 风格 → AI</b></span>
   </div>
 </div>
 
-<div class="container" style="padding-top:28px;padding-bottom:60px">
+<div class="container" style="padding-top:22px;padding-bottom:60px">
 
-  <!-- ==================== INPUT ==================== -->
-  <section class="section" id="input-section">
-    <div class="card">
-      <div class="section-title"><span class="num">1</span> 输入 Logo 颜色</div>
+  <!-- ═══════════ 第一屏：看效果 → 选方案 → 复制给 AI ═══════════ -->
+  <section class="stage" id="stage">
+    <div class="stage-head">
+      <div>
+        <h2 class="stage-title">选一种风格，看到完整页面，一次复制给 AI</h2>
+        <p class="stage-sub">打开即是成品：不用先上传 Logo、不用先填颜色。风格缩略图由真实样式生成，点开就换整个案例页；满意后把 tokens、风格规则、组件 CSS 一次复制走。</p>
+      </div>
+      <div class="stage-actions">
+        <button class="btn btn-primary btn-lg" onclick="copyAIPrompt()">⧉ 复制给 AI</button>
+        <span class="copy-state" id="copy-ai-state"></span>
+      </div>
+    </div>
 
-      <!-- Logo 取色区 -->
-      <div class="drop-zone" id="drop-zone">
-        <span class="dz-icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5.5-5.5L5 20"/></svg>
-        </span>
-        <p style="color:var(--ui-text-secondary);font-size:.86rem;margin:0">拖拽或点击上传 Logo 自动取色</p>
-        <p style="color:var(--ui-text-muted);font-size:.74rem;margin:2px 0 0">提取后自动填入下方色值，也可手动编辑</p>
-        <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoFile(this.files[0])" style="display:none">
-      </div>
+    <div class="case-notice">
+      <span class="cn-k">案例声明</span>
+      <span>下面看到的是<strong>效果案例</strong>：品牌名（PULSE / 舒心 / NEXUS / 知卷 / 藏卷 / 开物 / 白盒）、指标数字、稿件与作品都是演示内容，<strong>不属于你要生成的真实项目</strong>。使用真实业务时，内容与数据全部替换。</span>
+    </div>
 
-      <!-- 60-30-10 定理可视化：中性 60 · 辅助 30 · 强调 10 -->
-      <div class="golden-rule" aria-hidden="true">
-        <div class="golden-rule-bands">
-          <span class="gr-band" style="width:60%;background:var(--color-bg-secondary,#E9E8E2)"></span>
-          <span class="gr-band" style="width:30%;background:var(--color-surface-secondary,#E6E2D4)"></span>
-          <span class="gr-band" style="width:10%;background:var(--color-accent-base,#D6452E)"></span>
-        </div>
-        <div class="golden-rule-labels">
-          <span>60% 中性</span><span>30% 辅助</span><span>10% 强调</span>
-        </div>
-      </div>
+    <!-- 风格选择：7 种完整方案，缩略预览 = 真实样式 -->
+    <div class="style-picker" id="style-picker" data-theme="light" role="radiogroup" aria-label="风格选择"></div>
 
-      <div class="input-grid" id="color-inputs">
-        <div class="input-color-group" data-index="0">
-          <div class="label-row">
-            <label>颜色 1（主角）</label>
-          </div>
-          <div class="input-row">
-            <input type="color" value="#2563EB" onchange="syncHexInput(this)">
-            <input type="text" value="#2563EB" placeholder="#000000" class="hex-input" onchange="syncColorPicker(this)">
-            <input type="number" value="100" min="0" max="100" placeholder="%" class="weight-input">
-            <span class="pct-sign">%</span>
-          </div>
-        </div>
+    <!-- 预览工具条 -->
+    <div class="preview-toolbar">
+      <div class="theme-toggle-bar" id="demo-type-toggle">
+        <button class="theme-toggle-btn active" data-val="landing" onclick="setDemoType('landing', this)">着陆页</button>
+        <button class="theme-toggle-btn" data-val="app" onclick="setDemoType('app', this)">工作台</button>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-outline btn-sm" onclick="addColorInput()">+ 添加颜色</button>
-        <button class="btn btn-primary" onclick="generate()">生成色彩系统</button>
+      <div class="theme-toggle-bar" id="theme-toggle">
+        <button class="theme-toggle-btn active" data-theme="light" onclick="setPreviewTheme('light', this)">亮色</button>
+        <button class="theme-toggle-btn" data-theme="dark" onclick="setPreviewTheme('dark', this)">暗色</button>
       </div>
-      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">色彩策略</span>
-        <div class="theme-toggle-bar" id="strategy-toggle">
-          <button class="theme-toggle-btn" data-val="restrained" onclick="setStrategy('restrained', this)">克制</button>
-          <button class="theme-toggle-btn active" data-val="committed" onclick="setStrategy('committed', this)">投入</button>
-          <button class="theme-toggle-btn" data-val="full-palette" onclick="setStrategy('full-palette', this)">全色板</button>
-          <button class="theme-toggle-btn" data-val="drenched" onclick="setStrategy('drenched', this)">浸染</button>
-        </div>
-        <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary);margin-left:8px">间距基准</span>
-        <div class="theme-toggle-bar" id="base-unit-toggle">
-          <button class="theme-toggle-btn active" data-val="4" onclick="setSpaceBaseUnit(4, this)">4px 精细</button>
-          <button class="theme-toggle-btn" data-val="8" onclick="setSpaceBaseUnit(8, this)">8px 标准</button>
-        </div>
-        <span style="font-size:.74rem;color:var(--ui-text-muted)">间距阶梯默认基于 4px 精细网格，与 Tailwind 对齐</span>
-      </div>
-      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-          <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">实时调色</span>
-          <span style="font-size:.74rem;color:var(--ui-text-muted)">拖动滑块微调强调色，页面实时刷新</span>
-          <span style="font-size:.68rem;font-family:var(--ui-font-mono);color:var(--ui-accent);letter-spacing:.02em" id="tweak-context"></span>
-          <span style="display:inline-flex;align-items:center;gap:7px;margin-left:auto">
-            <span id="tweak-swatch" style="width:26px;height:26px;border-radius:3px;border:1px solid var(--ui-border-strong);background:#2563eb;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)"></span>
-            <span id="tweak-hex" style="font-family:var(--ui-font-mono);font-size:.68rem;color:var(--ui-text-secondary);letter-spacing:.02em">#2563eb</span>
-          </span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-          <div>
-            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">H <span id="tweak-h-val">240°</span></label>
-            <input type="range" id="tweak-h" min="0" max="360" value="240" step="1" style="width:100%;accent-color:var(--ui-accent)">
-          </div>
-          <div>
-            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">C <span id="tweak-c-val">0.22</span></label>
-            <input type="range" id="tweak-c" min="0" max="0.30" value="0.22" step="0.005" style="width:100%;accent-color:var(--ui-accent)">
-          </div>
-          <div>
-            <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">L <span id="tweak-l-val">0.50</span></label>
-            <input type="range" id="tweak-l" min="0.30" max="0.80" value="0.50" step="0.01" style="width:100%;accent-color:var(--ui-accent)">
-          </div>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="btn btn-sm btn-outline" onclick="resetTweaks()">重置</button>
-          <span style="font-size:.68rem;color:var(--ui-text-muted);margin-top:6px" id="tweak-status"></span>
-        </div>
-      </div>
-      <p class="note">支持 1-4 个品牌色。多色时可填权重百分比（如 60%、25%、15%），不填则均分。点击「生成」后自动选出最佳强调色，同步生成空间间距 Token。</p>
+      <span class="toolbar-spacer"></span>
+      <span class="toolbar-hint" id="preview-hint"></span>
+      <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
+    </div>
+
+    <!-- 主预览 -->
+    <div class="card" id="comp-preview-card">
+      <div id="component-demo"></div>
+    </div>
+
+    <!-- 当前风格的设计约定（随风格切换） -->
+    <div class="rules-strip">
+      <div class="rules-strip-title" id="rules-strip-title">标准世界 · 现代 SaaS <span class="rs-hint">（让页面不丑的最低标准，会随「复制给 AI」一起带走）</span></div>
+      <div id="rules-strip-items"></div>
     </div>
   </section>
 
-  <!-- ==================== RESULTS ==================== -->
-  <div id="results" style="display:none">
-
-    <!-- Analysis -->
-    <section class="section" id="analysis-section">
+  <!-- ═══════════ 详细调整（可选，退出必经流程） ═══════════ -->
+  <details class="adv" id="brand-details">
+    <summary><span class="num">01</span> 详细调整（可选）<span class="sum-hint">品牌色 / Logo 取色 / 色彩策略 / 间距基准 / 实时调色</span></summary>
+    <div class="adv-body">
       <div class="card">
-        <div class="section-title"><span class="num">2</span> 分析诊断</div>
-        <div id="analysis-content"></div>
-        <div id="detector-summary" style="margin-top:16px"></div>
-        <details id="detector-details" style="margin-top:8px;display:none">
-          <summary>查看 Detector 自检明细</summary>
-          <div id="detector-detail-content" style="margin-top:12px"></div>
-        </details>
-      </div>
-    </section>
+        <div class="section-title" style="margin-bottom:14px">品牌色与色彩策略</div>
+        <p class="note" style="margin:-6px 0 14px">不填也能用：未显式设置品牌色时，每种风格使用它自己的默认色（标准偏蓝、暖糖偏暖、流光偏紫、书卷偏砖红、褐页偏褐、构色偏朱红、展厅偏青绿）。显式设置后，切换风格会保留你的颜色。</p>
 
-    <!-- Accent Colors -->
-    <section class="section" id="accent-section">
-      <div class="card">
-        <div class="section-title"><span class="num">3</span> 强调色 · 5 级色阶</div>
-        <div class="dual-grid">
-          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="accent-light"></div></div>
-          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="accent-dark"></div></div>
+        <div class="drop-zone" id="drop-zone">
+          <span class="dz-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5.5-5.5L5 20"/></svg>
+          </span>
+          <p style="color:var(--ui-text-secondary);font-size:.86rem;margin:0">拖拽或点击上传 Logo 自动取色（可选）</p>
+          <p style="color:var(--ui-text-muted);font-size:.74rem;margin:2px 0 0">提取后自动填入下方色值，也可手动编辑</p>
+          <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoFile(this.files[0])" style="display:none">
         </div>
-      </div>
-    </section>
 
-    <!-- Neutral Colors -->
-    <section class="section" id="neutral-section">
-      <div class="card">
-        <div class="section-title"><span class="num">4</span> 中性色 · 8 级灰阶 <span id="neutral-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
-        <div class="dual-grid">
-          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="neutral-light"></div></div>
-          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="neutral-dark"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Secondary Colors -->
-    <section class="section" id="secondary-section">
-      <div class="card">
-        <div class="section-title"><span class="num">5</span> 辅助色</div>
-        <div class="dual-grid">
-          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="secondary-light"></div></div>
-          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="secondary-dark"></div></div>
-        </div>
-        <details style="margin-top:16px">
-          <summary>查看邻近色备选方案</summary>
-          <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">亮色 · 邻近</span><div class="swatch-grid" id="adjacent-light"></div></div>
-            <div><span class="dual-col-label dark">暗色 · 邻近</span><div class="swatch-grid" id="adjacent-dark"></div></div>
+        <div class="golden-rule" aria-hidden="true">
+          <div class="golden-rule-bands">
+            <span class="gr-band" style="width:60%;background:var(--color-bg-secondary,#E9E8E2)"></span>
+            <span class="gr-band" style="width:30%;background:var(--color-surface-secondary,#E6E2D4)"></span>
+            <span class="gr-band" style="width:10%;background:var(--color-accent-base,#D6452E)"></span>
           </div>
-        </details>
-        <details style="margin-top:12px">
-          <summary>查看冷暖对比方案（温度反差辅助）</summary>
-          <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">亮色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-light"></div></div>
-            <div><span class="dual-col-label dark">暗色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-dark"></div></div>
+          <div class="golden-rule-labels">
+            <span>60% 中性</span><span>30% 辅助</span><span>10% 强调</span>
           </div>
-        </details>
-        <details style="margin-top:12px">
-          <summary>查看纯灰色方案（内容型产品适用）</summary>
-          <div class="dual-grid" style="margin-top:12px">
-            <div><span class="dual-col-label light">亮色 · 灰色</span><div class="swatch-grid" id="gray-secondary-light"></div></div>
-            <div><span class="dual-col-label dark">暗色 · 灰色</span><div class="swatch-grid" id="gray-secondary-dark"></div></div>
-          </div>
-        </details>
-      </div>
-    </section>
-
-    <!-- Functional Colors -->
-    <section class="section" id="functional-section">
-      <div class="card">
-        <div class="section-title"><span class="num">6</span> 功能色</div>
-        <div class="dual-grid">
-          <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="functional-light"></div></div>
-          <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="functional-dark"></div></div>
         </div>
-      </div>
-    </section>
 
-    <!-- Spacing Scale -->
-    <section class="section" id="spacing-section">
-      <div class="card">
-        <div class="section-title"><span class="num">7</span> 间距系统 · 12 级阶梯 <span id="spacing-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
-        <div class="dual-grid">
-          <div>
-            <div class="space-bar-group">
-              <div class="space-bar-group-label">基础阶梯 (px)</div>
-              <div id="spacing-scale-light"></div>
+        <div class="input-grid" id="color-inputs">
+          <div class="input-color-group" data-index="0">
+            <div class="label-row">
+              <label>颜色 1（主角）</label>
             </div>
-          </div>
-          <div>
-            <div class="space-bar-group">
-              <div class="space-bar-group-label">语义应用预览</div>
-              <div id="spacing-preview-viz"></div>
+            <div class="input-row">
+              <input type="color" value="#2563EB" onchange="syncHexInput(this)">
+              <input type="text" value="#2563EB" placeholder="#000000" class="hex-input" onchange="syncColorPicker(this)">
+              <input type="number" value="100" min="0" max="100" placeholder="%" class="weight-input">
+              <span class="pct-sign">%</span>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Spacing Semantic Tokens -->
-    <section class="section" id="spacing-tokens-section">
-      <div class="card">
-        <div class="section-title"><span class="num">8</span> 间距语义 Token</div>
-        <div style="overflow-x:auto">
-          <table class="token-table" id="space-token-table">
-            <thead><tr><th>Token 名称</th><th>px 值</th><th>rem 值</th><th>映射自</th><th>用途</th></tr></thead>
-            <tbody id="space-token-table-body"></tbody>
-          </table>
+        <div class="btn-row">
+          <button class="btn btn-outline btn-sm" onclick="addColorInput()">+ 添加颜色</button>
+          <button class="btn btn-primary" onclick="generate()">重新生成色彩系统</button>
         </div>
-      </div>
-    </section>
 
-    <!-- Component Showcase -->
-    <section class="section" id="components-section">
-      <div class="rules-strip">
-        <div class="rules-strip-title" id="rules-strip-title">光谱世界 · 纸面工业 <span class="rs-hint">（让页面不丑的最低标准，组件 CSS 导出时一并带走）</span></div>
-        <div id="rules-strip-items">
-          <div class="rules-strip-item"><b class="rs-k">01 强调是例外</b>彩色只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），一屏 ≤ 3 处</div>
-          <div class="rules-strip-item"><b class="rs-k">02 数据即读数</b>数据 / 编号 / 时间一律等宽 tabular；字重分级，别让同一字重从头走到尾</div>
-          <div class="rules-strip-item"><b class="rs-k">03 发丝线结构</b>全部结构靠 1px 发丝边框与纸白分层；3px 倒角，禁用圆角胶囊</div>
-          <div class="rules-strip-item"><b class="rs-k">04 深度靠线不靠色</b>偏移阴影 + 发丝线；无渐变、无光斑、无装饰彩虹</div>
-          <div class="rules-strip-item"><b class="rs-k">05 气质</b>像天文台控制台——数据可信，界面退后</div>
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border);display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">色彩策略</span>
+          <div class="theme-toggle-bar" id="strategy-toggle">
+            <button class="theme-toggle-btn" data-val="restrained" onclick="setStrategy('restrained', this)">克制</button>
+            <button class="theme-toggle-btn active" data-val="committed" onclick="setStrategy('committed', this)">投入</button>
+            <button class="theme-toggle-btn" data-val="full-palette" onclick="setStrategy('full-palette', this)">全色板</button>
+            <button class="theme-toggle-btn" data-val="drenched" onclick="setStrategy('drenched', this)">浸染</button>
+          </div>
+          <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary);margin-left:8px">间距基准</span>
+          <div class="theme-toggle-bar" id="base-unit-toggle">
+            <button class="theme-toggle-btn active" data-val="4" onclick="setSpaceBaseUnit(4, this)">4px 精细</button>
+            <button class="theme-toggle-btn" data-val="8" onclick="setSpaceBaseUnit(8, this)">8px 标准</button>
+          </div>
+          <span style="font-size:.74rem;color:var(--ui-text-muted)">间距阶梯默认基于 4px 精细网格，与 Tailwind 对齐</span>
         </div>
-      </div>
-      <div class="card" id="comp-preview-card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:14px;flex-wrap:wrap">
-          <div class="section-title" style="margin-bottom:0"><span class="num">9</span> 组件案例</div>
-          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-            <div class="theme-toggle-bar" id="demo-type-toggle">
-              <button class="theme-toggle-btn active" data-val="landing" onclick="setDemoType('landing', this)">着陆页</button>
-              <button class="theme-toggle-btn" data-val="app" onclick="setDemoType('app', this)">工作台</button>
+
+        <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--ui-border)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+            <span style="font-size:.78rem;font-weight:600;color:var(--ui-text-secondary)">实时调色</span>
+            <span style="font-size:.74rem;color:var(--ui-text-muted)">拖动滑块微调强调色，预览与导出实时刷新</span>
+            <span style="font-size:.68rem;font-family:var(--ui-font-mono);color:var(--ui-accent);letter-spacing:.02em" id="tweak-context"></span>
+            <span style="display:inline-flex;align-items:center;gap:7px;margin-left:auto">
+              <span id="tweak-swatch" style="width:26px;height:26px;border-radius:3px;border:1px solid var(--ui-border-strong);background:#2563eb;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)"></span>
+              <span id="tweak-hex" style="font-family:var(--ui-font-mono);font-size:.68rem;color:var(--ui-text-secondary);letter-spacing:.02em">#2563eb</span>
+            </span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div>
+              <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">H <span id="tweak-h-val">240°</span></label>
+              <input type="range" id="tweak-h" min="0" max="360" value="240" step="1" style="width:100%;accent-color:var(--ui-accent)">
             </div>
-            <div class="theme-toggle-bar" id="demo-style-toggle">
-              <button class="theme-toggle-btn active" data-val="spectrum" onclick="setDemoStyle('spectrum', this)">光谱</button>
-              <button class="theme-toggle-btn" data-val="standard" onclick="setDemoStyle('standard', this)">标准</button>
-              <button class="theme-toggle-btn" data-val="soft" onclick="setDemoStyle('soft', this)">暖糖</button>
-              <button class="theme-toggle-btn" data-val="glass" onclick="setDemoStyle('glass', this)">流光</button>
-              <button class="theme-toggle-btn" data-val="editorial" onclick="setDemoStyle('editorial', this)">书卷</button>
+            <div>
+              <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">C <span id="tweak-c-val">0.22</span></label>
+              <input type="range" id="tweak-c" min="0" max="0.30" value="0.22" step="0.005" style="width:100%;accent-color:var(--ui-accent)">
             </div>
-            <div class="theme-toggle-bar" id="theme-toggle">
-              <button class="theme-toggle-btn active" data-theme="light" onclick="setPreviewTheme('light', this)">亮色</button>
-              <button class="theme-toggle-btn" data-theme="dark" onclick="setPreviewTheme('dark', this)">暗色</button>
+            <div>
+              <label style="font-size:.74rem;font-weight:600;color:var(--ui-text-secondary);display:flex;justify-content:space-between">L <span id="tweak-l-val">0.50</span></label>
+              <input type="range" id="tweak-l" min="0.30" max="0.80" value="0.50" step="0.01" style="width:100%;accent-color:var(--ui-accent)">
             </div>
-            <button class="fs-open" onclick="openFullscreenPreview()">⛶ 全屏预览</button>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="btn btn-sm btn-outline" onclick="resetTweaks()">重置</button>
+            <span style="font-size:.68rem;color:var(--ui-text-muted);margin-top:6px" id="tweak-status"></span>
           </div>
         </div>
-        <div id="component-demo">
-          <!-- Dynamically filled -->
-        </div>
+        <p class="note">支持 1-4 个品牌色。多色时可填权重百分比（如 60%、25%、15%），不填则均分。点击「重新生成」后自动选出最佳强调色，并同步生成空间间距 Token。</p>
       </div>
-    </section>
+    </div>
+  </details>
 
-    <!-- Token Export -->
-    <section class="section" id="css-section">
+  <!-- ═══════════ 高级导出 ═══════════ -->
+  <details class="adv" id="advanced-details">
+    <summary><span class="num">02</span> 高级导出<span class="sum-hint">CSS 变量 / 组件 CSS / 风格提示词 / Tailwind / JSON Tokens</span></summary>
+    <div class="adv-body">
       <div class="card">
-        <div class="section-title"><span class="num">10</span> Token 导出</div>
+        <p class="note" style="margin:-4px 0 14px">主出口是上面的「复制给 AI」——它已经包含 tokens、风格规则、组件 CSS 与用途规则。下面这些是给需要单独格式的场景准备的，不要求逐个收集。</p>
         <div class="theme-toggle-bar" id="export-toggle" style="margin-bottom:14px">
-          <button class="theme-toggle-btn active" data-val="css" onclick="setExportFormat('css', this)">CSS 变量</button>
+          <button class="theme-toggle-btn active" data-val="ai" onclick="setExportFormat('ai', this)">一次复制给 AI</button>
+          <button class="theme-toggle-btn" data-val="css" onclick="setExportFormat('css', this)">CSS 变量</button>
           <button class="theme-toggle-btn" data-val="component" onclick="setExportFormat('component', this)">组件 CSS</button>
           <button class="theme-toggle-btn" data-val="prompt" onclick="setExportFormat('prompt', this)">风格提示词</button>
           <button class="theme-toggle-btn" data-val="tailwind" onclick="setExportFormat('tailwind', this)">Tailwind</button>
@@ -511,14 +453,123 @@ details[open] summary { margin-bottom: 12px; }
           </div>
         </details>
       </div>
-    </section>
+    </div>
+  </details>
 
-  </div>
+  <!-- ═══════════ 分析与检查（次级区域） ═══════════ -->
+  <details class="adv" id="inspect-details">
+    <summary><span class="num">03</span> 分析与检查<span class="sum-hint">诊断 / 自检 / 色阶 / 中性色 / 辅助色 / 功能色 / 间距 / 同内容风格对比</span></summary>
+    <div class="adv-body">
+      <div id="results">
+        <div class="card">
+          <div class="section-title"><span class="num">1</span> 同内容风格对比</div>
+          <p class="note" style="margin:-6px 0 14px">同一段内容、同一组 tokens，只换风格：用来确认差异确实来自排版、材料与构图，而不是换了业务文案。</p>
+          <div class="ce-compare-grid" id="compare-sample" data-theme="light"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">2</span> 分析诊断</div>
+          <div id="analysis-content"></div>
+          <div id="detector-summary" style="margin-top:16px"></div>
+          <details id="detector-details" style="margin-top:8px;display:none">
+            <summary>查看 Detector 自检明细</summary>
+            <div id="detector-detail-content" style="margin-top:12px"></div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">3</span> 强调色 · 5 级色阶</div>
+          <div class="dual-grid">
+            <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="accent-light"></div></div>
+            <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="accent-dark"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">4</span> 中性色 · 8 级灰阶 <span id="neutral-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
+          <div class="dual-grid">
+            <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="neutral-light"></div></div>
+            <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="neutral-dark"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">5</span> 辅助色</div>
+          <div class="dual-grid">
+            <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="secondary-light"></div></div>
+            <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="secondary-dark"></div></div>
+          </div>
+          <details style="margin-top:16px">
+            <summary>查看邻近色备选方案</summary>
+            <div class="dual-grid" style="margin-top:12px">
+              <div><span class="dual-col-label light">亮色 · 邻近</span><div class="swatch-grid" id="adjacent-light"></div></div>
+              <div><span class="dual-col-label dark">暗色 · 邻近</span><div class="swatch-grid" id="adjacent-dark"></div></div>
+            </div>
+          </details>
+          <details style="margin-top:12px">
+            <summary>查看冷暖对比方案（温度反差辅助）</summary>
+            <div class="dual-grid" style="margin-top:12px">
+              <div><span class="dual-col-label light">亮色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-light"></div></div>
+              <div><span class="dual-col-label dark">暗色 · 冷暖对比</span><div class="swatch-grid" id="warm-contrast-dark"></div></div>
+            </div>
+          </details>
+          <details style="margin-top:12px">
+            <summary>查看纯灰色方案（内容型产品适用）</summary>
+            <div class="dual-grid" style="margin-top:12px">
+              <div><span class="dual-col-label light">亮色 · 灰色</span><div class="swatch-grid" id="gray-secondary-light"></div></div>
+              <div><span class="dual-col-label dark">暗色 · 灰色</span><div class="swatch-grid" id="gray-secondary-dark"></div></div>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">6</span> 功能色</div>
+          <div class="dual-grid">
+            <div><span class="dual-col-label light">亮色模式</span><div class="swatch-grid" id="functional-light"></div></div>
+            <div><span class="dual-col-label dark">暗色模式</span><div class="swatch-grid" id="functional-dark"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">7</span> 间距系统 · 12 级阶梯 <span id="spacing-label" style="font-weight:400;font-size:.74rem;color:var(--ui-text-muted)"></span></div>
+          <div class="dual-grid">
+            <div>
+              <div class="space-bar-group">
+                <div class="space-bar-group-label">基础阶梯 (px)</div>
+                <div id="spacing-scale-light"></div>
+              </div>
+            </div>
+            <div>
+              <div class="space-bar-group">
+                <div class="space-bar-group-label">语义应用预览</div>
+                <div id="spacing-preview-viz"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><span class="num">8</span> 间距语义 Token</div>
+          <div style="overflow-x:auto">
+            <table class="token-table" id="space-token-table">
+              <thead><tr><th>Token 名称</th><th>px 值</th><th>rem 值</th><th>映射自</th><th>用途</th></tr></thead>
+              <tbody id="space-token-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
 </div>
 
+<!-- 预览用样式与 SVG defs：放在文档作用域，预览 / 缩略图 / 比较样张 / 全屏克隆共用一份 -->
+<style id="ce-demo-css"></style>
+<div id="ce-demo-defs" aria-hidden="true"></div>
+
+<!-- 生成后的 tokens（唯一数据源，由 renderComponents 注入） -->
 <style id="generated-tokens"></style>
 
-<!-- 全屏预览覆盖层：克隆当前示例，占满整个视口 -->
+<!-- 全屏预览覆盖层：克隆当前案例，占满整个视口（样式已在文档作用域内） -->
 <div id="fullscreen-overlay">
   <div class="fs-toolbar">
     <span class="fs-hint">ESC 退出</span>
@@ -531,8 +582,9 @@ details[open] summary { margin-bottom: 12px; }
   <div id="fullscreen-demo"></div>
 </div>
 
-<!-- 依赖顺序：数学 → 色阶推导 → 调度 → 间距 → 自检 → 渲染 → 示例 → 导出 → 交互 -->
+<!-- 依赖顺序：数学 → 风格注册表 → 色阶推导 → 调度 → 间距 → 自检 → 渲染 → 示例 → 导出 → 交互 -->
 <script src="color-math.js"></script>
+<script src="design-profiles.js"></script>
 <script src="color-engine-palette.js"></script>
 <script src="color-engine-core.js"></script>
 <script src="space-engine-core.js"></script>

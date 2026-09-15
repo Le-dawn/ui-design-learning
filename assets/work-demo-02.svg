@@ -1,0 +1,11 @@
+<!-- 演示图形：本项目自制（非第三方素材），仅用于演示作品容器的比例与排版方法 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="作品演示：潮线">
+  <rect width="800" height="600" fill="#1E1B18"/>
+  <g fill="none" stroke="#E8E2D6" stroke-width="2">
+    <path d="M0 420 C 120 380, 200 470, 320 430 S 540 360, 660 410 S 760 450, 800 420"/>
+    <path d="M0 460 C 140 420, 220 500, 340 460 S 560 400, 680 450 S 770 490, 800 460" opacity="0.72"/>
+    <path d="M0 500 C 160 460, 240 530, 360 495 S 580 440, 700 485 S 780 520, 800 500" opacity="0.45"/>
+  </g>
+  <circle cx="660" cy="185" r="86" fill="#C9603F"/>
+  <rect x="72" y="88" width="180" height="180" fill="none" stroke="#E8E2D6" stroke-width="1.5" opacity="0.6"/>
+</svg>

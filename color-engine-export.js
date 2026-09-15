@@ -1,9 +1,11 @@
 /* ============================================================
-   COLOR ENGINE EXPORT — Token 导出（CSS / 组件 / 风格提示词 / Tailwind / JSON）
-   依赖：color-math.js, color-engine-core.js, color-engine-demo.js
+   COLOR ENGINE EXPORT — 导出层
+   主出口：一次复制给 AI（tokens + 当前风格 + 组件 CSS + 用途规则 + 资源说明）
+   高级出口：CSS 变量 / 组件 CSS / 风格提示词 / Tailwind / JSON（保持可用）
+   依赖：color-math.js, design-profiles.js, color-engine-demo.js
    ============================================================ */
 
-let currentExportFormat = 'css';
+let currentExportFormat = 'ai';
 let _lastExport = null;
 
 function setExportFormat(fmt, btn) {
@@ -16,6 +18,7 @@ function setExportFormat(fmt, btn) {
 function renderExport(sys, tokens) {
   _lastExport = { sys, tokens };
   const codeEl = document.getElementById('css-code');
+  if (!codeEl) return;
   if (currentExportFormat === 'tailwind') {
     codeEl.textContent = buildTailwindConfig(tokens);
   } else if (currentExportFormat === 'json') {
@@ -24,67 +27,17 @@ function renderExport(sys, tokens) {
     codeEl.textContent = buildComponentCSSExport();
   } else if (currentExportFormat === 'prompt') {
     codeEl.textContent = buildStylePromptExport(tokens);
-  } else {
+  } else if (currentExportFormat === 'css') {
     codeEl.textContent = buildCSSExport(sys, tokens);
+  } else {
+    codeEl.textContent = buildAIPromptExport(tokens);
   }
 }
 
-// ── 风格提示词导出：tokens 具体值 + 当前风格 prompt，一键复制丢给 AI ──
-// 风格作用于整个项目（全站），当前示例页只是「先做到位」的主角页面。
-// 维护提示：提示词正文与 STYLES.md 第三节保持同步
-
-const STYLE_PROMPTS = {
-  spectrum: {
-    name: '光谱世界（纸面工业）',
-    body: [
-      '- 表面：纸白底 + 1px 发丝线边框 + 微偏移阴影；3px 小倒角，禁用圆角胶囊',
-      '- 字体：展示用几何无衬线（Avenir Next / Bahnschrift 类系统栈），数据/时间/编号用等宽字体（SF Mono / Cascadia Code 类），数字一律 tabular；别让同一字重从头走到尾',
-      '- 强调色：只出现在语义位置（主按钮 / 链接 / 选中态 / 状态点），中性色承担全部结构',
-      '- 装饰：无渐变、无光斑、无 emoji；图形用统一 1.8 描边 SVG 线稿',
-      '- 气质：像天文台控制台、实验室仪器——数据可信，界面退后'
-    ].join('\n')
-  },
-  soft: {
-    name: '暖糖（消费级圆润）',
-    body: [
-      '- 表面：大圆角（14–20px）+ 柔和多层阴影（模糊 10–30px、低透明度）+ 浅色细边框；状态点圆形',
-      '- 字体：圆润无衬线，字距可放宽，少用等宽字体',
-      '- 强调色：可以更活泼——按钮、徽章、图标底都能用，但一屏仍不超过 3 处',
-      '- 微交互：hover 上浮 1px，按压下沉，过渡 150ms',
-      '- 气质：亲切、安全、值得信任，像健康 / 教育类 App'
-    ].join('\n')
-  },
-  glass: {
-    name: '流光（玻璃科技）',
-    body: [
-      '- 表面：半透明玻璃面板（backdrop-filter blur 14–18px）+ 1px 半透明描边 + 大圆角（10–16px）',
-      '- 光效：主 CTA 带强调色辉光（0 0 0 1px 描边 + 8–26px 彩色阴影）；大区块顶部可加径向光斑',
-      '- 字体：现代几何无衬线，标题字距略收紧',
-      '- 气质：AI 产品、未来感、发光但不刺眼'
-    ].join('\n')
-  },
-  editorial: {
-    name: '书卷（编辑内容）',
-    body: [
-      '- 表面：纯色底 + 1px 细线分隔，几乎不用阴影；圆角 2–4px 或直角',
-      '- 字体：衬线显示字体（中文宋体 / 英文 Georgia 类），标题不收紧字距，正文行高 1.7',
-      '- 强调色：全场最多 1 处（链接或 CTA 二选一）',
-      '- 留白：区块间距 ≥ 80px，标题与正文间 8–12px；宁可空，不可挤',
-      '- 气质：杂志、出版社、编辑部'
-    ].join('\n')
-  },
-  standard: {
-    name: '标准（现代 SaaS）',
-    body: [
-      '- 表面：浅底 + 白卡浮起（适中圆角 8–12px + 柔和双层阴影），1px 细边框',
-      '- 字体：系统无衬线（Apple 栈），标题加粗 + 正文常规，数字 tabular；不引入特殊字体',
-      '- 强调色：标准用法——主按钮实色、链接、选中态、焦点环，一屏 ≤ 3 处',
-      '- 交互：hover 轻微上浮 + 阴影加深，active 内凹，过渡 150ms',
-      '- 装饰：无网格、无印章、无光斑、无渐变文字；图标用统一描边 SVG',
-      '- 气质：大多数成熟 SaaS 的通用面貌——干净、可信、不抢戏'
-    ].join('\n')
-  }
-};
+// 主复制入口使用的内容（与导出区「一次复制给 AI」完全同源）
+function currentAIPrompt() {
+  return _lastExport ? buildAIPromptExport(_lastExport.tokens) : '';
+}
 
 const TOKEN_GROUP_LABELS = {
   accent: '强调色', neutral: '中性色', state: '交互态', secondary: '辅助色',
@@ -93,32 +46,57 @@ const TOKEN_GROUP_LABELS = {
 };
 const TOKEN_GROUP_ORDER = ['accent', 'neutral', 'state', 'secondary', 'functional', 'elevation', 'radius', 'typography', 'space-scale', 'space-semantic'];
 
-// 项目级页面清单：风格作用于整个项目时的全站骨架（当前示例页为「主角页面」，全站页面同样遵循）
-const PROJECT_PAGES = [
-  { id: 'landing', name: '着陆页', spec: '顶栏导航 + Hero 主视觉 + 内容数据区 + 双栏信息区 + 页脚' },
-  { id: 'app', name: '工作台', spec: '左侧导航 + 顶栏（标题/搜索/用户）+ 内容面板网格' },
-  { id: 'list', name: '列表 / 表格页', spec: '工具栏 + 数据表格（行状态 + 操作列）+ 空状态' },
-  { id: 'form', name: '表单 / 设置页', spec: '分组卡片（标签 + 输入 + 辅助说明）+ 主 / 次按钮区' },
-  { id: 'modal', name: '弹层 / 菜单', spec: '浮层表面 + 阴影过渡 + ESC 关闭' },
-  { id: 'empty', name: '空状态 / 错误页', spec: '图标 + 一句话 + 单个主行动' }
-];
+// 项目级页面清单：四种用途由统一配置管理，每种风格给出各自的适配规则
+const PROJECT_PAGES = PAGE_PURPOSES;
 
-function buildStylePromptExport(tokens) {
-  const style = STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum;
-  const focusPage = currentDemoType === 'app' ? 'app' : 'landing';
+/* ══════════════════════════════════════════════════════════
+   主出口：一次复制给 AI
+   只包含当前风格所需的样式与共享基础（不把七套案例代码全带上）
+   ══════════════════════════════════════════════════════════ */
+
+function buildAIPromptExport(tokens) {
+  const id = normalizeStyleId(currentDemoStyle);
+  const p = getProfile(id);
 
   const lines = [];
-  lines.push('# 设计任务：全站统一风格（作用于整个项目）');
-  lines.push('请为整个项目设计一套统一视觉语言：以下风格与 tokens 作用于项目的**全部页面**——' +
-    '着陆页、工作台、列表/表格页、表单/设置页、弹层、空状态都必须遵守，而不是只做一个单页。' +
-    '当前以「' + (focusPage === 'app' ? '工作台' : '着陆页') + '」为主角示例页：先把它完整做到位，其余页面按同一套规则推导。' +
-    '输出全站共享 CSS + 各页面 HTML（亮色 / 暗色 data-theme="dark" 双主题）。');
+  lines.push('# 设计任务：一套 tokens + 一种风格，贯穿整个项目');
   lines.push('');
-  lines.push('## 设计 tokens（必须严格遵守，不得自造颜色 / 间距 / 字号 / 圆角 / 阴影）');
+  lines.push('把下面整段内容交给 AI，并在同一段里附上你的业务需求（要做什么产品、有哪些页面、什么内容）。');
+  lines.push('这段内容已经自洽：tokens、风格规则、必须保留的特征、组件 CSS、四种用途的做法、资源与回退都在里面，');
+  lines.push('**不需要用户再补组件 CSS 或解释设计术语**。');
   lines.push('');
+  lines.push('注意：文中出现的示例品牌（' + exampleBrands() + '）、示例数据与示例作品只是「案例演示」，');
+  lines.push('用于说明排版与组件用量，**不是你要实现的真实需求**，请全部替换为业务真实内容。');
+
+  // ── 1. 最小接入 ──
+  lines.push('');
+  lines.push('## 1. 最小接入方式');
+  lines.push('');
+  lines.push('```html');
+  lines.push('<!-- 亮色 -->');
+  lines.push('<html lang="zh-CN" data-theme="light">');
+  lines.push('  <body class="ce-style-' + id + '">        <!-- 风格类：整站只挂一次 -->');
+  lines.push('    <main class="ce-landing">…</main>  <!-- 用途类：营销页 -->');
+  lines.push('    <main class="ce-app">…</main>      <!-- 用途类：工作台 -->');
+  lines.push('  </body>');
+  lines.push('</html>');
+  lines.push('');
+  lines.push('<!-- 暗色：只改根节点属性，组件样式不写第二套 -->');
+  lines.push('<html lang="zh-CN" data-theme="dark">');
+  lines.push('```');
+  lines.push('');
+  lines.push('- 第 2 节的 tokens 以 CSS 变量提供，**只能使用这些变量**，不得自造颜色 / 间距 / 字号 / 圆角 / 阴影');
+  lines.push('- 第 4 节的组件 CSS 直接粘贴；第 5 节的四种用途骨架按你的页面套用，不要逐页发明样式');
+  lines.push('- 主题切换只切 `data-theme`；`--color-*` 的暗色值已在 tokens 里给出');
+  lines.push('- 若需要改变版式（例如把列表改成时间线），由你修改页面结构；**只换 CSS 变量无法完成所有风格转换**');
+
+  // ── 2. tokens ──
+  lines.push('');
+  lines.push('## 2. 设计 tokens（唯一视觉取值来源）');
   TOKEN_GROUP_ORDER.forEach(g => {
     const items = tokens.filter(t => t.group === g);
     if (!items.length) return;
+    lines.push('');
     lines.push('### ' + (TOKEN_GROUP_LABELS[g] || g));
     items.forEach(t => {
       const isColor = t.light && String(t.light).startsWith('#');
@@ -128,53 +106,144 @@ function buildStylePromptExport(tokens) {
         lines.push('- `' + t.name + '`: ' + t.light + ' — ' + t.usage);
       }
     });
+  });
+
+  // ── 3. 风格 ──
+  lines.push('');
+  lines.push('## 3. 风格：' + p.name + '（' + p.en + '）· ' + p.tagline);
+  lines.push('');
+  lines.push('适用场景：' + p.scene + '。不适用：' + p.avoid + '。');
+  lines.push('');
+  lines.push('**字体角色**：' + p.fontNote + '。');
+  lines.push('');
+  lines.push('**材料与品牌色的分工**：' + p.materialNote + '。');
+  lines.push('');
+  lines.push(profilePromptBody(id));
+
+  // ── 4. 组件 CSS ──
+  lines.push('');
+  lines.push('## 4. 组件 CSS（与预览案例完全同一份）');
+  lines.push('');
+  lines.push('```css');
+  lines.push(exportComponentCSS(id).trim());
+  lines.push('```');
+
+  // ── 5. 四种用途 ──
+  lines.push('');
+  lines.push('## 5. 页面用途规则（四种用途统一管理，不要另起第二套风格）');
+  PROJECT_PAGES.forEach(pg => {
     lines.push('');
+    lines.push('### ' + pg.name + '（`.ce-' + purposeClass(pg.id) + '` 骨架：' + pg.spec + '）');
+    lines.push('- 本风格的做法：' + (profilePurposeLine(id, pg.id) || '按骨架推导，视觉全部来自 tokens 与风格规则'));
   });
-  lines.push('## 风格');
-  lines.push(style.body);
+
+  // ── 6. 亮暗主题 ──
   lines.push('');
-  lines.push('## 页面清单（同一风格贯穿全站，每页先按骨架搭结构再填内容）');
-  PROJECT_PAGES.forEach(p => {
-    const mark = p.id === focusPage ? '（当前示例页：先完整做到位）' : '';
-    lines.push('- ' + p.name + '：' + p.spec + mark);
-  });
+  lines.push('## 6. 亮暗主题');
+  lines.push('- 只切 `data-theme="light"` / `data-theme="dark"`；组件 CSS 与结构完全不动');
+  lines.push('- 暗色不是亮色的反转：暗色下用 tokens 给出的暗色值，阴影加深、强调色降饱和防光晕');
+  if (p.materialOverrides) {
+    lines.push('- 本风格的材料色自带两套（见组件 CSS 中 `[data-theme="dark"] .ce-style-' + id + '`）：暗色是深底 + 暖浅字，不是普通黑白主题');
+  }
+  lines.push('- 两套主题都要实际检查一次：文字对比、边框可见性、状态色是否仍可辨识');
+
+  // ── 7. 资源与回退 ──
   lines.push('');
-  lines.push('## 全站规则');
-  lines.push('- 单一风格源：整个项目只存在这一种风格；所有页面共享同一组 tokens 与同一套组件规范，页内不出现任何未在 tokens 中定义的视觉值');
-  lines.push('- 组件复用：按钮、输入框、卡片、表格、导航等组件全站复用同一实现（见「组件 CSS」导出），不逐页发明、不逐页另起炉灶');
-  lines.push('- 结构先于装饰：每页先按页面清单对应的骨架搭结构，再填内容；不得重排骨架，不得在单页里开「风格分支」');
+  lines.push('## 7. 资源与回退（哪些东西不需要你提供、哪些必须替换）');
+  lines.push('- **字体**：三声部全部是系统原生栈（展示 / 正文 / 数据），无需引入任何 webfont，离线一致。换字体只需改 `--ce-display` / `--ce-body` / `--ce-mono` 三个变量');
+  lines.push('- **图标**：统一描边 SVG（1.2–1.8px 线宽），不用 emoji、不用位图图标');
+  lines.push('- **图片**：案例里的作品图是项目自制的演示素材（`assets/work-demo-01…06.svg`），**不能当作你的内容**；请替换为你的真实素材。缺图时用虚线占位框标注，不要用装饰插画凑数');
+  lines.push('- **玻璃 / 模糊**：`backdrop-filter` 不被支持时用 `@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)))` 把玻璃面还原成不透明表面（`--color-bg-secondary`）+ 描边 + 投影。**不要只写半透明背景就了事**：没有 blur 时底层正文会直接穿过导航条，两行字叠在一起谁也读不了');
+  lines.push('- **动效**：唯一进场/持续动效都要配 `prefers-reduced-motion: reduce` 关闭');
+
+  // ── 8. 边界 ──
   lines.push('');
-  lines.push('## 约束');
-  lines.push('- 只使用上面给出的 tokens，不得自造任何颜色、间距、字号、圆角、阴影');
-  lines.push('- 不用渐变文字；不用 emoji 做图标（用统一描边 SVG）');
-  lines.push('- 阴影必须有偏移 + 模糊（除非风格提示明确要求硬阴影）');
-  lines.push('- 一屏一个主角元素；内容用中文，可参照天文观测 / 数据平台类文案');
+  lines.push('## 8. 必须保留 vs 可自行安排');
+  lines.push('- **必须保留**：第 3 节「必须保留的特征」、tokens 的语义与用法、四种用途的骨架方式、组件复用（不逐页另起炉灶）');
+  lines.push('- **可自行安排**：内容与文案、页面数量、业务功能与数据结构；布局可按业务调整，但不得引入 tokens 之外的视觉值');
+  lines.push('- 业务事实以你的需求为准：不要沿用案例里的品牌名、指标数字、人物与作品');
+
+  // ── 9. 交付与自检 ──
   lines.push('');
-  lines.push('## 参考');
-  lines.push('如需组件级参考代码，请同时复制「组件 CSS」导出并粘贴。');
+  lines.push('## 9. 交付与自检');
+  lines.push('- 交付物：全站共享 CSS + 各页面 HTML，亮暗双主题，中文文案');
+  lines.push('- 自检清单：① 首屏主次是否清楚（一个主角元素）② 窄屏 390px 是否折行且无横向溢出（本套样式在该宽度已实测为 0 溢出）③ 中文长标题是否换行且不撑破容器 ④ hover / active / focus / disabled 是否都有定义 ⑤ 颜色是否全部来自 tokens ⑥ 是否只用了一种风格');
+  lines.push('- 如果你无法在浏览器中渲染验证，请明确说明哪些部分未经渲染验证，不要默认通过');
   return lines.join('\n');
 }
 
-// 组件 CSS：与组件案例页完全同一份样式，配合 CSS 变量复制即用
-function buildComponentCSSExport() {
-  const styleName = (STYLE_PROMPTS[currentDemoStyle] || STYLE_PROMPTS.spectrum).name;
-  return '/* ═══════════════════════════════════════════\n' +
-    '   Color Engine — 组件 CSS（' + styleName + ' · Solstice 示例）\n' +
-    '   配合「CSS 变量」导出一起使用：先复制 :root / [data-theme="dark"]，再复制本文件\n' +
-    '   字体：系统原生栈，零依赖（展示 Avenir Next / Bahnschrift 类 · 正文系统无衬线 · 数据 SF Mono / Cascadia Code）\n' +
-    '   所有值都引用 CSS 变量，换肤只改变量不碰组件\n' +
-    '\n' +
-    '   光谱世界设计约定（让页面不丑的最低标准）：\n' +
-    '   1. 强调是例外：一屏只给主按钮 / 链接 / 选中态，彩色只在语义位置\n' +
-    '   2. 字体有声音：展示 + 正文成对，数据用等宽 tabular 数字\n' +
-    '   3. 组内紧、组间松：标题组 8px，卡片内 24px，区块间 ≥ 48px\n' +
-    '   4. 深度靠阴影不靠色：发丝边框 + 偏移阴影，不叠圆角胶囊\n' +
-    '   5. 禁止 AI 俗套：图标卡平铺、眉题 eyebrow、渐变文字、卡片套卡片\n' +
-    '   ═══════════════════════════════════════════ */\n\n' +
-    buildDemoCSS().trim() + '\n';
+function purposeClass(id) {
+  return id === 'marketing' ? 'landing' : (id === 'app' ? 'app' : id);
 }
 
-// Tailwind config（theme.extend 片段，colors/spacing/radius/shadow/渐变一次导出）
+function exampleBrands() {
+  const names = [];
+  STYLE_IDS.forEach(function (id) {
+    const n = { standard: 'PULSE', soft: '舒心', glass: 'NEXUS', editorial: '知卷', sepia: '藏卷', poster: '开物', gallery: '白盒' }[id];
+    if (names.indexOf(n) === -1) names.push(n);
+  });
+  return names.join(' / ');
+}
+
+/* ── 高级出口 1：风格提示词（tokens + 全站风格 brief） ── */
+
+function buildStylePromptExport(tokens) {
+  const id = normalizeStyleId(currentDemoStyle);
+  const p = getProfile(id);
+  const focusPage = currentDemoType === 'app' ? 'app' : 'landing';
+
+  const lines = [];
+  lines.push('# 设计任务：全站统一风格（作用于整个项目）');
+  lines.push('请为整个项目设计一套统一视觉语言：以下风格与 tokens 作用于项目的**全部页面**——' +
+    '营销页、工作台、阅读页、展示页都必须遵守，而不是只做一个单页。' +
+    '当前以「' + (focusPage === 'app' ? '工作台' : '着陆页') + '」为主角示例页：先把它完整做到位，其余页面按同一套规则推导。');
+  lines.push('');
+  lines.push('## 设计 tokens（必须严格遵守，不得自造颜色 / 间距 / 字号 / 圆角 / 阴影）');
+  TOKEN_GROUP_ORDER.forEach(g => {
+    const items = tokens.filter(t => t.group === g);
+    if (!items.length) return;
+    lines.push('');
+    lines.push('### ' + (TOKEN_GROUP_LABELS[g] || g));
+    items.forEach(t => {
+      const isColor = t.light && String(t.light).startsWith('#');
+      if (isColor) lines.push('- `' + t.name + '`: ' + t.light + '（亮）/ ' + t.dark + '（暗）— ' + t.usage);
+      else lines.push('- `' + t.name + '`: ' + t.light + ' — ' + t.usage);
+    });
+  });
+  lines.push('');
+  lines.push('## 风格：' + p.name + '（' + p.en + '）');
+  lines.push(profilePromptBody(id));
+  lines.push('');
+  lines.push('## 页面清单（同一风格贯穿全站，每页先按骨架搭结构再填内容）');
+  PROJECT_PAGES.forEach(pg => {
+    lines.push('- ' + pg.name + '：' + pg.spec + (pg.id === focusPage ? '（当前主角示例页：先完整做到位）' : ''));
+  });
+  lines.push('');
+  lines.push('## 约束');
+  lines.push('- 只使用上面给出的 tokens，不得自造任何颜色、间距、字号、圆角、阴影');
+  lines.push('- 组件全站复用同一实现（见「组件 CSS」导出），不逐页发明');
+  lines.push('- 不用渐变文字；不用 emoji 做图标（用统一描边 SVG）');
+  lines.push('- 一屏一个主角元素；内容用中文');
+  return lines.join('\n');
+}
+
+/* ── 高级出口 2：组件 CSS ── */
+
+function buildComponentCSSExport() {
+  const id = normalizeStyleId(currentDemoStyle);
+  const p = getProfile(id);
+  return '/* ═══════════════════════════════════════════\n' +
+    '   Color Engine — 组件 CSS（' + p.name + ' · ' + p.en + '）\n' +
+    '   配合「CSS 变量」导出一起使用：先复制 :root / [data-theme="dark"]，再复制本文件\n' +
+    '   字体：系统原生栈，零依赖（展示 ' + p.en + ' 栈 · 正文系统无衬线 · 数据系统等宽）\n' +
+    '   所有取值都引用 CSS 变量，换肤只改变量不碰组件\n' +
+    '   风格约定：' + p.rules.map(r => r[0]).join(' / ') + '\n' +
+    '   ═══════════════════════════════════════════ */\n\n' +
+    exportComponentCSS(id);
+}
+
+/* ── 高级出口 3：Tailwind config ── */
+
 function buildTailwindConfig(tokens) {
   const colorGroups = { accent: {}, bg: {}, text: {}, surface: {}, border: {}, success: {}, warning: {}, error: {}, info: {} };
   tokens.forEach(t => {
@@ -233,14 +302,14 @@ function buildTailwindConfig(tokens) {
   return lines.join('\n');
 }
 
-// W3C Design Tokens JSON（颜色按组嵌套 + 双主题 light/dark，间距/圆角/阴影为 dimension/string）
+/* ── 高级出口 4：W3C Design Tokens JSON ── */
+
 function buildJSONTokens(tokens) {
   const out = { color: {}, dimension: {}, string: {} };
   tokens.forEach(t => {
     const key = t.name.replace(/^--color-/, '').replace(/^--space-/, '').replace(/^--radius-/, 'radius.').replace(/^--shadow-/, 'shadow.').replace(/^--gradient-/, 'gradient.').replace(/^--/, '');
     const isColor = t.light && t.light.charAt(0) === '#';
     if (isColor) {
-      // accent-base → color.accent.base；accent-on-accent → color.accent['on-accent']
       const parts = key.split('-');
       const group = parts[0];
       const name = parts.slice(1).join('-') || 'DEFAULT';
@@ -257,7 +326,7 @@ function buildJSONTokens(tokens) {
   return JSON.stringify(out, null, 2);
 }
 
-// ── CSS 变量导出 ────────────────────────────────────
+/* ── 高级出口 5：CSS 变量 ── */
 
 function buildCSSExport(sys, tokens) {
   const lightHeaders = {
@@ -317,6 +386,3 @@ function buildCSSExport(sys, tokens) {
 
   return lines.join('\n');
 }
-
-// ── Token 对照表 ────────────────────────────────────
-

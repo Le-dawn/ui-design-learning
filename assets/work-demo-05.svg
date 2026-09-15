@@ -1,0 +1,8 @@
+<!-- 演示图形：本项目自制（非第三方素材），仅用于演示作品容器的比例与排版方法 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="作品演示：留白">
+  <rect width="800" height="800" fill="#EFEAE0"/>
+  <rect x="240" y="240" width="320" height="320" fill="#7A8B7F"/>
+  <circle cx="240" cy="240" r="10" fill="#1E1B18"/>
+  <circle cx="560" cy="560" r="10" fill="#1E1B18"/>
+  <line x1="120" y1="680" x2="680" y2="680" stroke="#1E1B18" stroke-width="1" opacity="0.35"/>
+</svg>
